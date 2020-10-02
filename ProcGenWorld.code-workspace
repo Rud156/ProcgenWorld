@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "ProcGenWorld",
+			"path": "."
+		},
+		{
+			"name": "UE4",
+			"path": "D:\\Program Files\\Epic Games Store\\UE_4.25"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp"
+		]
+	}
+}

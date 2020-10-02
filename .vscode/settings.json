@@ -1,0 +1,11 @@
+{
+	"files.exclude": {
+		"C:/Users/rudra/Documents/Unreal Projects/ProcGenWorld/.git": true,
+		"C:/Users/rudra/Documents/Unreal Projects/ProcGenWorld/.vs": true,
+		"C:/Users/rudra/Documents/Unreal Projects/ProcGenWorld/.vscode": true,
+		"C:/Users/rudra/Documents/Unreal Projects/ProcGenWorld/Content": true,
+		"C:/Users/rudra/Documents/Unreal Projects/ProcGenWorld/DerivedDataCache": true,
+		"C:/Users/rudra/Documents/Unreal Projects/ProcGenWorld/Intermediate": true,
+		"C:/Users/rudra/Documents/Unreal Projects/ProcGenWorld/Saved": true
+	}
+}

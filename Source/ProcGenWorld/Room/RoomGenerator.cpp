@@ -19,8 +19,18 @@ ARoomGenerator::ARoomGenerator()
 void ARoomGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-	FString fileName = "TestRoom.txt";
+// Called every frame
+void ARoomGenerator::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void ARoomGenerator::LoadRoomFromFile(FString roomName)
+{
+	FString fileName = roomName + ".txt";
+	_roomName = roomName;
 
 	FString directory = FPaths::ProjectContentDir() + "/Data";
 	FString result;
@@ -36,12 +46,6 @@ void ARoomGenerator::BeginPlay()
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "File Not Found");
 	}
-}
-
-// Called every frame
-void ARoomGenerator::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void ARoomGenerator::RenderRoomFromString(FString roomString, FVector startPosition)
@@ -157,6 +161,11 @@ void ARoomGenerator::RenderRoomFromString(FString roomString, FVector startPosit
 	//GetWorld()->SpawnActor(TestDoorPrefab, &_leftColumnDoorPosition, &FRotator::ZeroRotator);
 	//GetWorld()->SpawnActor(TestDoorPrefab, &_rightColumnDoorPosition, &FRotator::ZeroRotator);
 	//GetWorld()->SpawnActor(TestDoorPrefab, &_bottomRowDoorPosition, &FRotator::ZeroRotator);
+}
+
+FString ARoomGenerator::GetRoomName()
+{
+	return _roomName;
 }
 
 FVector ARoomGenerator::GetStartPosition()

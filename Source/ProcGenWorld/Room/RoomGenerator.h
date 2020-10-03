@@ -22,6 +22,8 @@ private:
 	FVector _leftColumnDoorPosition;
 	FVector _rightColumnDoorPosition;
 
+	FString _roomName;
+
 	void RenderRoomFromString(FString roomString, FVector startPosition);
 
 public:
@@ -47,7 +49,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void LoadRoomFromFile(FString roomName);
+
+	FString GetRoomName();
 	FVector GetStartPosition();
+
 	FVector GetTopRowDoorPosition();
 	FVector GetBottomRowDoorPosition();
 	FVector GetLeftColumnDoorPosition();

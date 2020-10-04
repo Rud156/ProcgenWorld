@@ -43,6 +43,7 @@ private:
 	int _randomSeed;
 
 	void GenerateRoomBase();
+	void RenderRooms();
 	void UpdateMinMaxRowColumn(int i, int j);
 	void UpdateRoomMatrixCounter();
 

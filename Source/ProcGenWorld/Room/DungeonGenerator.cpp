@@ -133,7 +133,7 @@ void ADungeonGenerator::GenerateRoomBase()
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("WoWser!!! Base Generation Complete"));
+	UE_LOG(LogTemp, Warning, TEXT("Wowser!!! Base Generation Complete"));
 
 	PlaceSingleDoorRooms();
 	MergeSingleDoorRooms();
@@ -143,6 +143,10 @@ void ADungeonGenerator::GenerateRoomBase()
 	UE_LOG(LogTemp, Warning, TEXT("I: %d, J: %d, Spawn: %s, I: %d, J: %d, Exit: %s"),
 		_spawnRoomRow, _spawnRoomColumn, *_roomMatrix[_spawnRoomRow][_spawnRoomColumn],
 		_exitRoomRow, _exitRoomColumn, *_roomMatrix[_exitRoomRow][_exitRoomColumn]);
+}
+
+void ADungeonGenerator::RenderRooms()
+{
 }
 
 void ADungeonGenerator::UpdateMinMaxRowColumn(int i, int j)

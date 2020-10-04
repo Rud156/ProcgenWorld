@@ -8,17 +8,6 @@ ADungeonGenerator::ADungeonGenerator()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	_minRow = 999;
-	_maxRow = -1;
-	_minColumn = 999;
-	_maxColumn = -1;
-
-	_spawnRoomRow = -1;
-	_spawnRoomColumn = -1;
-
-	_exitRoomRow = -1;
-	_exitRoomColumn = -1;
 }
 
 // Called when the game starts or when spawned
@@ -46,6 +35,18 @@ void ADungeonGenerator::Tick(float DeltaTime)
 
 void ADungeonGenerator::GenerateRoomBase()
 {
+	_roomMatrix = TMap<int, TMap<int, FString>>();
+	_roomMatrixCounter = TMap<int, TMap<int, int>>();
+	_roomAdjacencyList = TMap<int, TArray<int>>();
+
+	_minRow = 999;
+	_maxRow = -1;
+	_minColumn = 999;
+	_maxColumn = -1;
+
+	_exitRoomRow = 100;
+	_exitRoomColumn = 100;
+
 	_spawnRoomRow = 100;
 	_spawnRoomColumn = 100;
 
@@ -55,8 +56,12 @@ void ADungeonGenerator::GenerateRoomBase()
 	auto validSpawnRooms = GetRoomWithNonSingleExit(RoomNames);
 	int randomSpawnRoom = _stream.RandRange(0, validSpawnRooms.Num() - 1);
 
-	_roomMatrix[i] = TMap<int, FString>();
-	_roomMatrix[i][j] = validSpawnRooms[randomSpawnRoom];
+	_roomMatrix.Add(i, TMap<int, FString>());
+	_roomMatrix[i].Add(j, validSpawnRooms[randomSpawnRoom]);
+
+	UE_LOG(LogTemp, Warning, TEXT("Spawn Room: %s"), *validSpawnRooms[randomSpawnRoom]);
+
+	UpdateMinMaxRowColumn(i, j);
 
 	while (true) {
 		auto randomSide = SelectRandomExit(_roomMatrix[i][j]);
@@ -81,7 +86,7 @@ void ADungeonGenerator::GenerateRoomBase()
 		UpdateMinMaxRowColumn(i, j);
 
 		if (!_roomMatrix.Contains(i)) {
-			_roomMatrix[i] = TMap<int, FString>();
+			_roomMatrix.Add(i, TMap<int, FString>());
 		}
 
 		auto exits = GetAdjacentRoomExits(i, j);
@@ -107,10 +112,11 @@ void ADungeonGenerator::GenerateRoomBase()
 			room = GetRoomWithExits(RoomNames, exits[0], exits[1], exits[2], 1);
 		}
 		else {
+			UE_LOG(LogTemp, Warning, TEXT("Added 3"));
 			room = GetRoomWithExits(RoomNames, exits[0], exits[1], exits[2], exits[3]);
 		}
 
-		_roomMatrix[i][j] = room;
+		_roomMatrix[i].Add(j, room);
 
 		UpdateRoomMatrixCounter();
 		UpdateRoomAdjacencyList();
@@ -119,7 +125,7 @@ void ADungeonGenerator::GenerateRoomBase()
 			+ FString::SanitizeFloat(exits[2]) + ", Bottom: " + FString::SanitizeFloat(exits[3]);
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *text);
 
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *_roomMatrix[i][j]);
+		UE_LOG(LogTemp, Warning, TEXT("%s, I: %d, J: %d"), *_roomMatrix[i][j], i, j);
 		PrintRooms();
 
 		bool breakLoop = CheckBFSForExitRoom();
@@ -128,9 +134,16 @@ void ADungeonGenerator::GenerateRoomBase()
 		}
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("WoWser, Base Generation Complete"));
+
 	PlaceSingleDoorRooms();
 	MergeSingleDoorRooms();
 	AdjustRoomEdges();
+
+	PrintRooms();
+	UE_LOG(LogTemp, Warning, TEXT("I: %d, J: %d, Spawn: %s, I: %d, J: %d, Exit: %s"),
+		_spawnRoomRow, _spawnRoomColumn, *_roomMatrix[_spawnRoomRow][_spawnRoomColumn],
+		_exitRoomRow, _exitRoomColumn, *_roomMatrix[_exitRoomRow][_exitRoomColumn]);
 }
 
 void ADungeonGenerator::UpdateMinMaxRowColumn(int i, int j)
@@ -154,15 +167,15 @@ void ADungeonGenerator::UpdateRoomMatrixCounter()
 {
 	int staticCounter = 0;
 
-	for (int i = 0; i <= _maxRow; i++) {
-		for (int j = _minColumn; j < _maxColumn; j++) {
+	for (int i = _minRow; i <= _maxRow; i++) {
+		for (int j = _minColumn; j <= _maxColumn; j++) {
 			if (_roomMatrix[i].Contains(j)) {
 
 				if (!_roomMatrixCounter.Contains(i)) {
-					_roomMatrixCounter[i] = TMap<int, int>();
+					_roomMatrixCounter.Add(i, TMap<int, int>());
 				}
 
-				_roomMatrixCounter[i][j] = staticCounter;
+				_roomMatrixCounter[i].Add(j, staticCounter);
 				staticCounter += 1;
 			}
 		}
@@ -177,7 +190,7 @@ void ADungeonGenerator::UpdateRoomAdjacencyList()
 		for (int j = _minColumn; j <= _maxColumn; j++) {
 			if (_roomMatrix[i].Contains(j)) {
 
-				TArray<int> adjacentRooms;
+				TArray<int> adjacentRooms = TArray<int>();
 				int roomNumber = _roomMatrixCounter[i][j];
 
 				bool hasLeftExit = false;
@@ -230,7 +243,7 @@ void ADungeonGenerator::UpdateRoomAdjacencyList()
 					}
 				}
 
-				_roomAdjacencyList[roomNumber] = adjacentRooms;
+				_roomAdjacencyList.Add(roomNumber, adjacentRooms);
 			}
 		}
 	}
@@ -327,7 +340,7 @@ void ADungeonGenerator::PlaceSingleDoorRooms()
 					UE_LOG(LogTemp, Warning, TEXT("Left Added"));
 
 					FString room = GetRoomWithExits(RoomNames, -1, 1, -1, -1);
-					_roomMatrix[i][leftSide] = room;
+					_roomMatrix[i].Add(leftSide, room);
 
 					if (minCoulmn > leftSide) {
 						minCoulmn = leftSide;
@@ -338,10 +351,10 @@ void ADungeonGenerator::PlaceSingleDoorRooms()
 					UE_LOG(LogTemp, Warning, TEXT("Right Added"));
 
 					FString room = GetRoomWithExits(RoomNames, 1, -1, -1, -1);
-					_roomMatrix[i][rightSide] = room;
+					_roomMatrix[i].Add(rightSide, room);
 
-					if (_maxColumn < rightSide) {
-						_maxColumn = rightSide;
+					if (maxColumn < rightSide) {
+						maxColumn = rightSide;
 					}
 				}
 
@@ -351,18 +364,18 @@ void ADungeonGenerator::PlaceSingleDoorRooms()
 
 						FString room = GetRoomWithExits(RoomNames, -1, -1, -1, 1);
 
-						_roomMatrix[topSide] = TMap<int, FString>();
-						_roomMatrix[topSide][j] = room;
+						_roomMatrix.Add(topSide, TMap<int, FString>());
+						_roomMatrix[topSide].Add(j, room);
 					}
 					else if (!_roomMatrix[topSide].Contains(j)) {
 						UE_LOG(LogTemp, Warning, TEXT("Top Added 1"));
 
 						FString room = GetRoomWithExits(RoomNames, -1, -1, -1, 1);
-						_roomMatrix[topSide][j] = room;
+						_roomMatrix[topSide].Add(j, room);
 					}
 
-					if (_minRow > topSide) {
-						_minRow = topSide;
+					if (minRow > topSide) {
+						minRow = topSide;
 					}
 				}
 
@@ -372,18 +385,18 @@ void ADungeonGenerator::PlaceSingleDoorRooms()
 
 						FString room = GetRoomWithExits(RoomNames, -1, -1, 1, -1);
 
-						_roomMatrix[bottomSide] = TMap<int, FString>();
-						_roomMatrix[bottomSide][j] = room;
+						_roomMatrix.Add(bottomSide, TMap<int, FString>());
+						_roomMatrix[bottomSide].Add(j, room);
 					}
 					else if (!_roomMatrix[bottomSide].Contains(j)) {
 						UE_LOG(LogTemp, Warning, TEXT("Bottom Added 1"));
 
 						FString room = GetRoomWithExits(RoomNames, -1, -1, 1, -1);
-						_roomMatrix[bottomSide][j] = room;
+						_roomMatrix[bottomSide].Add(j, room);
 					}
 
-					if (_maxRow < bottomSide) {
-						_maxRow = bottomSide;
+					if (maxRow < bottomSide) {
+						maxRow = bottomSide;
 					}
 				}
 			}
@@ -429,7 +442,7 @@ void ADungeonGenerator::MergeSingleDoorRooms()
 
 				if (totalExits > 1) {
 					FString room = GetRoomWithSpecificExits(RoomNames, exits[0], exits[1], exits[2], exits[3]);
-					_roomMatrix[i][j] = room;
+					_roomMatrix[i].Add(j, room);
 				}
 			}
 		}
@@ -534,7 +547,7 @@ TArray<int> ADungeonGenerator::GetAdjacentRoomExits(int row, int column)
 	}
 
 	if (_roomMatrix[row].Contains(rightSide)) {
-		if (RoomHasLeftExit(_roomMatrix[row][leftSide])) {
+		if (RoomHasLeftExit(_roomMatrix[row][rightSide])) {
 			exitRight = 1;
 		}
 		else {
@@ -834,19 +847,28 @@ ADungeonGenerator::Side ADungeonGenerator::SelectRandomExit(FString roomName)
 
 	TArray<int> validIndex;
 	for (int i = 0; i < randomArray.Num(); i++) {
-		validIndex.Add(i);
+		if (randomArray[i] == 1) {
+			UE_LOG(LogTemp, Warning, TEXT("Side: %d"), i);
+			validIndex.Add(i);
+		}
+	}
+
+	if (validIndex.Num() <= 0) {
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "No Exit?...");
+		UE_LOG(LogTemp, Warning, TEXT("No Exit?..."));
+		return Side::Left;
 	}
 
 	int randomIndex = _stream.RandRange(0, validIndex.Num() - 1);
 	int randomSide = validIndex[randomIndex];
 
-	if (randomSide == 1) {
+	if (randomSide == 0) {
 		return Side::Left;
 	}
-	else if (randomSide == 2) {
+	else if (randomSide == 1) {
 		return Side::Right;
 	}
-	else if (randomSide == 3) {
+	else if (randomSide == 2) {
 		return Side::Top;
 	}
 	else {

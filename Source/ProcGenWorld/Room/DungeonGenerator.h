@@ -15,7 +15,6 @@ class PROCGENWORLD_API ADungeonGenerator : public AActor
 	GENERATED_BODY()
 
 private:
-	FRandomStream _stream;
 	enum class Side {
 		Left,
 		Right,
@@ -23,9 +22,12 @@ private:
 		Bottom
 	};
 
-	TArray<TArray<FString>> _roomMatrix;
-	TArray<TArray<int>> _roomCounter;
-	TMap<int, TArray<int>> _adjacencyList;
+	static const int ARRAY_NIL = -9999;
+	FRandomStream _stream;
+
+	TMap<int, TMap<int, FString>> _roomMatrix;
+	TMap<int, TMap<int, int>> _roomMatrixCounter;
+	TMap<int, TArray<int>> _roomAdjacencyList;
 
 	int _minRow;
 	int _maxRow;
@@ -43,15 +45,22 @@ private:
 	void GenerateRoomBase();
 	void UpdateMinMaxRowColumn(int i, int j);
 	void UpdateRoomMatrixCounter();
+
 	void UpdateRoomAdjacencyList();
 	bool CheckBFSForExitRoom();
+	int FindPathToSpawnRoom(int spawnRoomNumber, int startRoomNumber);
 
 	void PlaceSingleDoorRooms();
 	void MergeSingleDoorRooms();
+	void AdjustRoomEdges();
+
+	void PrintRooms();
 
 	TArray<int> GetAdjacentRoomExits(int row, int column);
+
 	FString GetRoomWithExits(TArray<FString> roomNames, int exitLeft, int exitRight, int exitTop, int exitBottom);
-	TArray<FString> GetAllRoomWithExits(TArray<FString> rooms, int exitLeft, int exitRight, int exitTop, int exitBottom);
+	FString GetRoomWithSpecificExits(TArray<FString> roomNames, int exitLeft, int exitRight, int exitTop, int exitBottom);
+	TArray<FString> GetAllRoomsWithExits(TArray<FString> rooms, int exitLeft, int exitRight, int exitTop, int exitBottom);
 
 	TArray<FString> GetRoomsWithLeftExit(TArray<FString> rooms);
 	TArray<FString> GetRoomsWithRightExit(TArray<FString> rooms);
@@ -67,6 +76,7 @@ private:
 	bool RoomHasRightExit(FString roomName);
 	bool RoomHasTopExit(FString roomName);
 	bool RoomHasBottomExit(FString roomName);
+	bool RoomHasSingleExit(FString roomName);
 
 	TArray<FString> GetRoomWithNonSingleExit(TArray<FString> roomNames);
 	Side SelectRandomExit(FString roomName);
@@ -75,12 +85,12 @@ public:
 #pragma region Properties
 
 	UPROPERTY(Category = Rooms, EditAnywhere)
-		bool UseRandomSeed;
+		bool UseCustomSeed;
 
 	UPROPERTY(Category = Rooms, EditAnywhere)
-		int RandomSeed;
+		int CustomSeed;
 
-	UPROPERTY(Category = Rooms, ExitAnywhere)
+	UPROPERTY(Category = Rooms, EditAnywhere)
 		int SearchDepth;
 
 	UPROPERTY(Category = Rooms, EditAnywhere)

@@ -6,8 +6,9 @@
 #include "Math/RandomStream.h"
 
 #include "GameFramework/Actor.h"
-
 #include "DungeonGenerator.generated.h"
+
+class ARoomGenerator;
 
 UCLASS()
 class PROCGENWORLD_API ADungeonGenerator : public AActor
@@ -27,6 +28,7 @@ private:
 
 	TMap<int, TMap<int, FString>> _roomMatrix;
 	TMap<int, TMap<int, int>> _roomMatrixCounter;
+	TMap<int, TMap<int, ARoomGenerator*>> _rooms;
 	TMap<int, TArray<int>> _roomAdjacencyList;
 
 	int _minRow;
@@ -93,6 +95,9 @@ public:
 
 	UPROPERTY(Category = Rooms, EditAnywhere)
 		int SearchDepth;
+
+	UPROPERTY(Category = Rooms, EditAnywhere)
+		FVector SpawnRoomPoint;
 
 	UPROPERTY(Category = Rooms, EditAnywhere)
 		TArray<FString> RoomNames;

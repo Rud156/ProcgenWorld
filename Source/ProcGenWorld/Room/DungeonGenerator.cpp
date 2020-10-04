@@ -2,6 +2,7 @@
 
 
 #include "DungeonGenerator.h"
+#include "RoomGenerator.h"
 
 // Sets default values
 ADungeonGenerator::ADungeonGenerator()
@@ -25,6 +26,7 @@ void ADungeonGenerator::BeginPlay()
 	}
 
 	GenerateRoomBase();
+	RenderRooms();
 }
 
 // Called every frame
@@ -147,6 +149,26 @@ void ADungeonGenerator::GenerateRoomBase()
 
 void ADungeonGenerator::RenderRooms()
 {
+	_rooms = TMap<int, TMap<int, ARoomGenerator*>>();
+	FVector currentPosition = SpawnRoomPoint;
+
+	for (int i = _minRow; i <= _maxRow; i++) {
+		for (int j = _minColumn; j <= _maxColumn; j++) {
+			if (_roomMatrix.Contains(i)) {
+				if (!_rooms.Contains(i)) {
+					_rooms.Add(i, TMap<int, ARoomGenerator*>());
+				}
+
+				if (_roomMatrix[i].Contains(j)) {
+					AActor* roomInstance = GetWorld()->SpawnActor(RoomGenerator, &FVector::ZeroVector, &FRotator::ZeroRotator);
+					ARoomGenerator* roomGenerator = Cast<ARoomGenerator>(roomInstance);
+
+					roomGenerator->LoadRoomFromFile(_roomMatrix[i][j], currentPosition);
+					_rooms[i].Add(j, roomGenerator);
+				}
+			}
+		}
+	}
 }
 
 void ADungeonGenerator::UpdateMinMaxRowColumn(int i, int j)

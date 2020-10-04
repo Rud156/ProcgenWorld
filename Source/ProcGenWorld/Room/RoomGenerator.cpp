@@ -8,17 +8,17 @@ ARoomGenerator::ARoomGenerator()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	_topRowDoorPosition = FVector::ZeroVector;
-	_bottomRowDoorPosition = FVector::ZeroVector;
-	_leftColumnDoorPosition = FVector::ZeroVector;
-	_rightColumnDoorPosition = FVector::ZeroVector;
 }
 
 // Called when the game starts or when spawned
 void ARoomGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+
+	_topRowDoorPosition = FVector::ZeroVector;
+	_bottomRowDoorPosition = FVector::ZeroVector;
+	_leftColumnDoorPosition = FVector::ZeroVector;
+	_rightColumnDoorPosition = FVector::ZeroVector;
 }
 
 // Called every frame
@@ -27,7 +27,7 @@ void ARoomGenerator::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ARoomGenerator::LoadRoomFromFile(FString roomName)
+void ARoomGenerator::LoadRoomFromFile(FString roomName, FVector startPosition)
 {
 	FString fileName = roomName + ".txt";
 	_roomName = roomName;
@@ -41,7 +41,7 @@ void ARoomGenerator::LoadRoomFromFile(FString roomName)
 	if (fileManager.FileExists(*filePath)) {
 		FFileHelper::LoadFileToString(result, *filePath, FFileHelper::EHashOptions::None);
 
-		RenderRoomFromString(result, FVector(0, 560, 0));
+		RenderRoomFromString(result, startPosition);
 	}
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "File Not Found");

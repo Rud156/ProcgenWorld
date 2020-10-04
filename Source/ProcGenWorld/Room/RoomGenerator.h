@@ -49,7 +49,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void LoadRoomFromFile(FString roomName);
+	void LoadRoomFromFile(FString roomName, FVector startPosition);
 
 	FString GetRoomName();
 	FVector GetStartPosition();

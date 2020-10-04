@@ -112,7 +112,6 @@ void ADungeonGenerator::GenerateRoomBase()
 			room = GetRoomWithExits(RoomNames, exits[0], exits[1], exits[2], 1);
 		}
 		else {
-			UE_LOG(LogTemp, Warning, TEXT("Added 3"));
 			room = GetRoomWithExits(RoomNames, exits[0], exits[1], exits[2], exits[3]);
 		}
 
@@ -134,7 +133,7 @@ void ADungeonGenerator::GenerateRoomBase()
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("WoWser, Base Generation Complete"));
+	UE_LOG(LogTemp, Warning, TEXT("WoWser!!! Base Generation Complete"));
 
 	PlaceSingleDoorRooms();
 	MergeSingleDoorRooms();

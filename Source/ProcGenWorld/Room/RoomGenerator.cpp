@@ -48,6 +48,7 @@ void ARoomGenerator::Tick(float DeltaTime)
 
 		_lerpAmount += GetWorld()->GetDeltaSeconds() * LerpSpeed;
 		if (_lerpAmount >= 1) {
+			this->SetActorLocation(_lerpTargetPosition);
 			_isLerpActive = false;
 		}
 	}

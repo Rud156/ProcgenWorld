@@ -118,6 +118,11 @@ void ARoomGenerator::RenderRoomFromString(FString roomString, FVector startPosit
 			if (nextLetter == '-') {
 				leftDoorPositionCalculated = true;
 				rightDoorPositionCalculated = true;
+
+				currentPosition.X = startPosition.X;
+			}
+			else {
+				currentPosition.X = startPosition.X + WallThickness * 1.125f;
 			}
 
 			if (!lastSpawnVertical) {
@@ -127,7 +132,7 @@ void ARoomGenerator::RenderRoomFromString(FString roomString, FVector startPosit
 				currentPosition.Y += WallWidth;
 			}
 
-			currentPosition.X = startPosition.X + WallThickness * 1.25f;
+
 
 			columnCount += 1;
 			rowCountCalculated = true;

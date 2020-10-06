@@ -25,6 +25,13 @@ void ARoomGenerator::BeginPlay()
 	_isLerpActive = false;
 }
 
+void ARoomGenerator::Destroyed()
+{
+	for (int i = 0; i < _walls.Num(); i++) {
+		_walls[i]->Destroy();
+	}
+}
+
 // Called every frame
 void ARoomGenerator::Tick(float DeltaTime)
 {

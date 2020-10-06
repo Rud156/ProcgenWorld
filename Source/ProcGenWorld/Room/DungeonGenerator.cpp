@@ -35,6 +35,26 @@ void ADungeonGenerator::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+int ADungeonGenerator::GetSeed()
+{
+	return _randomSeed;
+}
+
+void ADungeonGenerator::RegenrateRooms()
+{
+	for (int i = _minRow; i <= _maxRow; i++) {
+		for (int j = _minColumn; j <= _maxColumn; j++) {
+			if (_rooms[i].Contains(j)) {
+				auto roomGenerator = _rooms[i][j];
+				roomGenerator->Destroy();
+			}
+		}
+	}
+
+	GenerateRoomBase();
+	SpawnRooms();
+}
+
 void ADungeonGenerator::GenerateRoomBase()
 {
 	_roomMatrix = TMap<int, TMap<int, FString>>();

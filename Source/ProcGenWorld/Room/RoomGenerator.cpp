@@ -258,3 +258,28 @@ int ARoomGenerator::GetColumnCount()
 {
 	return _columnCount;
 }
+
+AActor* ARoomGenerator::GetFloor()
+{
+	return _floor;
+}
+
+TArray<AActor*> ARoomGenerator::GetWalls()
+{
+	return _walls;
+}
+
+void ARoomGenerator::SetFloorColor(int roomType, UStaticMeshComponent* mesh)
+{
+	// 1: Spawn, 2: Exit, 3: General
+
+	if (roomType == 1) {
+		mesh->SetMaterial(0, SpawnMaterial);
+	}
+	else if (roomType == 2) {
+		mesh->SetMaterial(0, ExitMaterial);
+	}
+	else {
+		mesh->SetMaterial(0, GeneralMaterial);
+	}
+}

@@ -65,6 +65,9 @@ void ADungeonGenerator::SetSearchDepth(int i_searchDepth)
 	if (i_searchDepth > 20) {
 		i_searchDepth = 20;
 	}
+	else if (i_searchDepth <= 0) {
+		i_searchDepth = 1;
+	}
 
 	SearchDepth = i_searchDepth;
 }
@@ -221,6 +224,16 @@ void ADungeonGenerator::SpawnRooms()
 
 					roomGenerator->LoadRoomFromFile(_roomMatrix[i][j], SpawnRoomPoint);
 					_rooms[i].Add(j, roomGenerator);
+
+					if (i == _spawnRoomRow && j == _spawnRoomColumn) {
+						roomGenerator->UpdateFloorMaterial(1);
+					}
+					else if (i == _exitRoomRow && j == _exitRoomColumn) {
+						roomGenerator->UpdateFloorMaterial(2);
+					}
+					else {
+						roomGenerator->UpdateFloorMaterial(3);
+					}
 				}
 			}
 		}

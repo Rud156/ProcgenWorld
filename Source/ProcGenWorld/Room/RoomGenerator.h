@@ -51,6 +51,15 @@ public:
 	UPROPERTY(Category = Wall, EditAnywhere)
 		float WallThickness;
 
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* SpawnMaterial;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* ExitMaterial;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* GeneralMaterial;
+
 	UPROPERTY(Category = WallMovement, EditAnywhere)
 		float LerpSpeed;
 
@@ -76,6 +85,17 @@ public:
 	int GetRowCount();
 	int GetColumnCount();
 
+	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
+	AActor* GetFloor();
+
+	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
+	TArray<AActor*> GetWalls();
+
+	UFUNCTION(Category = Display, BlueprintCallable)
+		void SetFloorColor(int roomType, UStaticMeshComponent* mesh);
+
+	UFUNCTION(Category = Display, BlueprintImplementableEvent)
+		void UpdateFloorMaterial(int roomType);
 
 protected:
 	// Called when the game starts or when spawned

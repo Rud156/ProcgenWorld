@@ -23,7 +23,7 @@ private:
 		Bottom
 	};
 
-	static const int ARRAY_NIL = -9999;
+	static const int DEPTH_MARKER = -9999;
 	FRandomStream _stream;
 
 	TMap<int, TMap<int, FString>> _roomMatrix;
@@ -45,13 +45,16 @@ private:
 	int _randomSeed;
 
 	void GenerateRoomBase();
-	void RenderRooms();
+	void SpawnRooms();
+	void AdjustRoomPositions();
+
 	void UpdateMinMaxRowColumn(int i, int j);
 	void UpdateRoomMatrixCounter();
 
 	void UpdateRoomAdjacencyList();
 	bool CheckBFSForExitRoom();
 	int FindPathToSpawnRoom(int spawnRoomNumber, int startRoomNumber);
+	TArray<int> GetRoomRowAndColumn(int roomNumber);
 
 	void PlaceSingleDoorRooms();
 	void MergeSingleDoorRooms();

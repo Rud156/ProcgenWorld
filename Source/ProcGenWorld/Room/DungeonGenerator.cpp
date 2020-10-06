@@ -26,7 +26,7 @@ void ADungeonGenerator::BeginPlay()
 	}
 
 	GenerateRoomBase();
-	RenderRooms();
+	SpawnRooms();
 }
 
 // Called every frame
@@ -140,6 +140,8 @@ void ADungeonGenerator::GenerateRoomBase()
 	PlaceSingleDoorRooms();
 	MergeSingleDoorRooms();
 	AdjustRoomEdges();
+	UpdateRoomMatrixCounter();
+	UpdateRoomAdjacencyList();
 
 	PrintRooms();
 	UE_LOG(LogTemp, Warning, TEXT("I: %d, J: %d, Spawn: %s, I: %d, J: %d, Exit: %s"),
@@ -147,10 +149,9 @@ void ADungeonGenerator::GenerateRoomBase()
 		_exitRoomRow, _exitRoomColumn, *_roomMatrix[_exitRoomRow][_exitRoomColumn]);
 }
 
-void ADungeonGenerator::RenderRooms()
+void ADungeonGenerator::SpawnRooms()
 {
 	_rooms = TMap<int, TMap<int, ARoomGenerator*>>();
-	FVector currentPosition = SpawnRoomPoint;
 
 	for (int i = _minRow; i <= _maxRow; i++) {
 		for (int j = _minColumn; j <= _maxColumn; j++) {
@@ -163,10 +164,82 @@ void ADungeonGenerator::RenderRooms()
 					AActor* roomInstance = GetWorld()->SpawnActor(RoomGenerator, &FVector::ZeroVector, &FRotator::ZeroRotator);
 					ARoomGenerator* roomGenerator = Cast<ARoomGenerator>(roomInstance);
 
-					roomGenerator->LoadRoomFromFile(_roomMatrix[i][j], currentPosition);
+					roomGenerator->LoadRoomFromFile(_roomMatrix[i][j], SpawnRoomPoint);
 					_rooms[i].Add(j, roomGenerator);
 				}
 			}
+		}
+	}
+
+	AdjustRoomPositions();
+}
+
+void ADungeonGenerator::AdjustRoomPositions()
+{
+	TSet<int> explored;
+	TQueue<int> queue;
+	queue.Enqueue(_roomMatrixCounter[_spawnRoomRow][_spawnRoomColumn]);
+
+	while (!queue.IsEmpty())
+	{
+		int node;
+		queue.Dequeue(node);
+
+		if (!explored.Contains(node)) {
+			auto rowColumn = GetRoomRowAndColumn(node);
+			int leftSide = rowColumn[1] - 1;
+			int rightSide = rowColumn[1] + 1;
+			int topSide = rowColumn[0] - 1;
+			int bottomSide = rowColumn[0] + 1;
+
+			auto adjacentRooms = _roomAdjacencyList[node];
+			auto mainRoom = _rooms[rowColumn[0]][rowColumn[1]];
+
+			for (int i = 0; i < adjacentRooms.Num(); i++) {
+				auto room = adjacentRooms[i];
+				queue.Enqueue(room);
+
+				if (_roomMatrixCounter.Contains(topSide) && _roomMatrixCounter[topSide].Contains(rowColumn[1]) &&
+					_roomMatrixCounter[topSide][rowColumn[1]] == room) {
+					auto roomInstance = _rooms[topSide][rowColumn[1]];
+
+					auto topDoorPosition = mainRoom->GetTopRowDoorPosition();
+					auto bottomDoorPosition = roomInstance->GetBottomRowDoorPosition();
+					auto positionDiff = topDoorPosition - bottomDoorPosition;
+
+					roomInstance->UpdateRoomPosition(positionDiff);
+				}
+				else if (_roomMatrixCounter.Contains(bottomSide) && _roomMatrixCounter[bottomSide].Contains(rowColumn[1]) &&
+					_roomMatrixCounter[bottomSide][rowColumn[1]] == room) {
+					auto roomInstance = _rooms[bottomSide][rowColumn[1]];
+
+					auto bottomDoorPosition = mainRoom->GetBottomRowDoorPosition();
+					auto topDoorPosition = roomInstance->GetTopRowDoorPosition();
+					auto positionDiff = bottomDoorPosition - topDoorPosition;
+
+					roomInstance->UpdateRoomPosition(positionDiff);
+				}
+				else if (_roomMatrixCounter[rowColumn[0]].Contains(leftSide) && _roomMatrixCounter[rowColumn[0]][leftSide] == room) {
+					auto roomInstance = _rooms[rowColumn[0]][leftSide];
+
+					auto leftDoorPosition = mainRoom->GetLeftColumnDoorPosition();
+					auto rightDoorPosition = roomInstance->GetRightColumnDoorPosition();
+					auto positionDiff = leftDoorPosition - rightDoorPosition;
+
+					roomInstance->UpdateRoomPosition(positionDiff);
+				}
+				else if (_roomMatrixCounter[rowColumn[0]].Contains(rightSide) && _roomMatrixCounter[rowColumn[0]][rightSide] == room) {
+					auto roomInstance = _rooms[rowColumn[0]][rightSide];
+
+					auto rightDoorPosition = mainRoom->GetRightColumnDoorPosition();
+					auto leftDoorPosition = roomInstance->GetLeftColumnDoorPosition();
+					auto positionDiff = rightDoorPosition - leftDoorPosition;
+
+					roomInstance->UpdateRoomPosition(positionDiff);
+				}
+			}
+
+			explored.Add(node);
 		}
 	}
 }
@@ -302,7 +375,7 @@ bool ADungeonGenerator::CheckBFSForExitRoom()
 int ADungeonGenerator::FindPathToSpawnRoom(int spawnRoomNumber, int startRoomNumber)
 {
 	TSet<int> explored;
-	TArray<int> queue = { startRoomNumber, ARRAY_NIL };
+	TArray<int> queue = { startRoomNumber, DEPTH_MARKER };
 	int pathLength = 0;
 
 	if (spawnRoomNumber == startRoomNumber) {
@@ -313,9 +386,9 @@ int ADungeonGenerator::FindPathToSpawnRoom(int spawnRoomNumber, int startRoomNum
 		int node = queue[0];
 		queue.RemoveAt(0);
 
-		if (node == ARRAY_NIL) {
+		if (node == DEPTH_MARKER) {
 			pathLength = pathLength + 1;
-			queue.Add(ARRAY_NIL);
+			queue.Add(DEPTH_MARKER);
 		}
 		else if (!explored.Contains(node)) {
 			auto adjacentRooms = _roomAdjacencyList[node];
@@ -337,6 +410,23 @@ int ADungeonGenerator::FindPathToSpawnRoom(int spawnRoomNumber, int startRoomNum
 	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, "Can't reach Spawn Room");
 
 	return -1;
+}
+
+TArray<int> ADungeonGenerator::GetRoomRowAndColumn(int roomNumber)
+{
+	TArray<int> rowColumn = TArray<int>();
+
+	for (int i = _minRow; i <= _maxRow; i++) {
+		for (int j = _minColumn; j <= _maxColumn; j++) {
+			if (_roomMatrixCounter[i].Contains(j) && _roomMatrixCounter[i][j] == roomNumber) {
+				rowColumn.Add(i);
+				rowColumn.Add(j);
+				break;
+			}
+		}
+	}
+
+	return rowColumn;
 }
 
 void ADungeonGenerator::PlaceSingleDoorRooms()
@@ -817,7 +907,25 @@ bool ADungeonGenerator::RoomHasBottomExit(FString roomName)
 
 bool ADungeonGenerator::RoomHasSingleExit(FString roomName)
 {
-	return false;
+	int totalExits = 0;
+
+	if (RoomHasLeftExit(roomName)) {
+		totalExits += 1;
+	}
+
+	if (RoomHasRightExit(roomName)) {
+		totalExits += 1;
+	}
+
+	if (RoomHasTopExit(roomName)) {
+		totalExits += 1;
+	}
+
+	if (RoomHasBottomExit(roomName)) {
+		totalExits += 1;
+	}
+
+	return totalExits == 1;
 }
 
 TArray<FString> ADungeonGenerator::GetRoomWithNonSingleExit(TArray<FString> roomNames)

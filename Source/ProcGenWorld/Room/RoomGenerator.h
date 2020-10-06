@@ -23,6 +23,12 @@ private:
 	FVector _rightColumnDoorPosition;
 
 	FString _roomName;
+	TArray<AActor*> _walls;
+
+	FVector _lerpStartPositon;
+	FVector _lerpTargetPosition;
+	float _lerpAmount;
+	bool _isLerpActive;
 
 	void RenderRoomFromString(FString roomString, FVector startPosition);
 
@@ -41,6 +47,9 @@ public:
 	UPROPERTY(Category = Wall, EditAnywhere)
 		float WallThickness;
 
+	UPROPERTY(Category = WallMovement, EditAnywhere)
+		float LerpSpeed;
+
 #pragma endregion
 
 	// Sets default values for this actor's properties
@@ -53,11 +62,12 @@ public:
 
 	FString GetRoomName();
 	FVector GetStartPosition();
+	void UpdateRoomPosition(FVector offset);
 
 	FVector GetTopRowDoorPosition();
 	FVector GetBottomRowDoorPosition();
 	FVector GetLeftColumnDoorPosition();
-	FVector GetRightColumnRowDoorPosition();
+	FVector GetRightColumnDoorPosition();
 
 	int GetRowCount();
 	int GetColumnCount();

@@ -2,6 +2,7 @@
 
 
 #include "RoomGenerator.h"
+#include "Math/UnrealMathUtility.h"
 
 // Sets default values
 ARoomGenerator::ARoomGenerator()
@@ -19,16 +20,31 @@ void ARoomGenerator::BeginPlay()
 	_bottomRowDoorPosition = FVector::ZeroVector;
 	_leftColumnDoorPosition = FVector::ZeroVector;
 	_rightColumnDoorPosition = FVector::ZeroVector;
+
+	_walls = TArray<AActor*>();
+	_isLerpActive = false;
 }
 
 // Called every frame
 void ARoomGenerator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (_isLerpActive) {
+		auto targetLocation = FMath::Lerp(_lerpStartPositon, _lerpTargetPosition, _lerpAmount);
+		this->SetActorLocation(targetLocation);
+
+		_lerpAmount += GetWorld()->GetDeltaSeconds() * LerpSpeed;
+		if (_lerpAmount >= 1) {
+			_isLerpActive = false;
+		}
+	}
 }
 
 void ARoomGenerator::LoadRoomFromFile(FString roomName, FVector startPosition)
 {
+	this->SetActorLocation(startPosition);
+
 	FString fileName = roomName + ".txt";
 	_roomName = roomName;
 
@@ -74,7 +90,9 @@ void ARoomGenerator::RenderRoomFromString(FString roomString, FVector startPosit
 
 		if (letter == '-')
 		{
-			GetWorld()->SpawnActor(WallPrefab, &currentPosition, &FRotator::ZeroRotator);
+			AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &FRotator::ZeroRotator);
+			wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			_walls.Add(wallInstance);
 
 			currentPosition.X += WallWidth;
 			lastSpawnVertical = false;
@@ -87,7 +105,9 @@ void ARoomGenerator::RenderRoomFromString(FString roomString, FVector startPosit
 				currentPosition.X += WallWidth - WallThickness * 1.25f;
 			}
 
-			GetWorld()->SpawnActor(WallPrefab, &currentPosition, &rotation90);
+			AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &rotation90);
+			wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			_walls.Add(wallInstance);
 
 			currentPosition.X += WallWidth;
 			lastSpawnVertical = true;
@@ -173,6 +193,20 @@ FVector ARoomGenerator::GetStartPosition()
 	return _startPosition;
 }
 
+void ARoomGenerator::UpdateRoomPosition(FVector offset)
+{
+	_lerpStartPositon = this->GetActorLocation();
+	_lerpTargetPosition = _startPosition + offset;
+	_lerpAmount = 0;
+	_isLerpActive = true;
+
+	_startPosition += offset;
+	_topRowDoorPosition += offset;
+	_bottomRowDoorPosition += offset;
+	_leftColumnDoorPosition += offset;
+	_rightColumnDoorPosition += offset;
+}
+
 FVector ARoomGenerator::GetTopRowDoorPosition()
 {
 	return _topRowDoorPosition;
@@ -188,7 +222,7 @@ FVector ARoomGenerator::GetLeftColumnDoorPosition()
 	return _leftColumnDoorPosition;
 }
 
-FVector ARoomGenerator::GetRightColumnRowDoorPosition()
+FVector ARoomGenerator::GetRightColumnDoorPosition()
 {
 	return _rightColumnDoorPosition;
 }

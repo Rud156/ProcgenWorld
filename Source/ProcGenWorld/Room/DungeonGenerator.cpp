@@ -455,7 +455,7 @@ int ADungeonGenerator::FindPathToSpawnRoom(int spawnRoomNumber, int startRoomNum
 		queue.RemoveAt(0);
 
 		if (node == DEPTH_MARKER) {
-			pathLength = pathLength + 1;
+			pathLength += 1;
 			queue.Add(DEPTH_MARKER);
 		}
 		else if (!explored.Contains(node)) {

@@ -116,8 +116,23 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(Category = Rooms, BlueprintCallable)
+	UFUNCTION(Category = Rooms, BlueprintCallable, BlueprintPure)
+		bool IsCustomSeedUsed();
+
+	UFUNCTION(Category = Rooms, BlueprintCallable, BlueprintPure)
 		int GetSeed();
+
+	UFUNCTION(Category = Rooms, BlueprintCallable, BlueprintPure)
+		int GetSearchDepth();
+
+	UFUNCTION(Category = Rooms, BlueprintCallable)
+		void SetCustomSeedStatus(bool i_useCustomSeed);
+	
+	UFUNCTION(Category = Rooms, BlueprintCallable)
+		void SetCustomSeed(int i_customSeed);
+
+	UFUNCTION(Category = Rooms, BlueprintCallable)
+		void SetSearchDepth(int i_searchDepth);
 
 	UFUNCTION(Category = Rooms, BlueprintCallable)
 		void RegenrateRooms();

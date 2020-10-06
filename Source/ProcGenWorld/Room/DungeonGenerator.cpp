@@ -35,13 +35,48 @@ void ADungeonGenerator::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+bool ADungeonGenerator::IsCustomSeedUsed()
+{
+	return UseCustomSeed;
+}
+
 int ADungeonGenerator::GetSeed()
 {
 	return _randomSeed;
 }
 
+int ADungeonGenerator::GetSearchDepth()
+{
+	return SearchDepth;
+}
+
+void ADungeonGenerator::SetCustomSeedStatus(bool i_useCustomSeed)
+{
+	UseCustomSeed = i_useCustomSeed;
+}
+
+void ADungeonGenerator::SetCustomSeed(int i_customSeed)
+{
+	_randomSeed = i_customSeed;
+}
+
+void ADungeonGenerator::SetSearchDepth(int i_searchDepth)
+{
+	if (i_searchDepth > 20) {
+		i_searchDepth = 20;
+	}
+
+	SearchDepth = i_searchDepth;
+}
+
 void ADungeonGenerator::RegenrateRooms()
 {
+	if (!UseCustomSeed) {
+		_randomSeed = FMath::Rand();
+	}
+
+	_stream = FRandomStream(_randomSeed);
+
 	for (int i = _minRow; i <= _maxRow; i++) {
 		for (int j = _minColumn; j <= _maxColumn; j++) {
 			if (_rooms[i].Contains(j)) {

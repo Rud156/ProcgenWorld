@@ -22,6 +22,7 @@ void ARoomGenerator::BeginPlay()
 	_rightColumnDoorPosition = FVector::ZeroVector;
 
 	_walls = TArray<AActor*>();
+	_floor = nullptr;
 	_isLerpActive = false;
 }
 
@@ -29,6 +30,10 @@ void ARoomGenerator::Destroyed()
 {
 	for (int i = 0; i < _walls.Num(); i++) {
 		_walls[i]->Destroy();
+	}
+
+	if (_floor != nullptr) {
+		_floor->Destroy();
 	}
 }
 
@@ -188,6 +193,11 @@ void ARoomGenerator::RenderRoomFromString(FString roomString, FVector startPosit
 
 	_rowCount = rowCount;
 	_columnCount = columnCount;
+
+	AActor* floorInstance = GetWorld()->SpawnActor(FloorPrefab, &_startPosition, &FRotator::ZeroRotator);
+	floorInstance->SetActorScale3D(FVector(_rowCount, _columnCount - 2, 1));
+	floorInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+	_floor = floorInstance;
 
 	//GetWorld()->SpawnActor(TestDoorPrefab, &_topRowDoorPosition, &FRotator::ZeroRotator);
 	//GetWorld()->SpawnActor(TestDoorPrefab, &_leftColumnDoorPosition, &FRotator::ZeroRotator);

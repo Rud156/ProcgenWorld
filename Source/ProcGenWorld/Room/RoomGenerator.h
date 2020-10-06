@@ -24,6 +24,7 @@ private:
 
 	FString _roomName;
 	TArray<AActor*> _walls;
+	AActor* _floor;
 
 	FVector _lerpStartPositon;
 	FVector _lerpTargetPosition;
@@ -37,6 +38,9 @@ public:
 
 	UPROPERTY(Category = Wall, EditAnywhere)
 		TSubclassOf<class AActor> WallPrefab;
+
+	UPROPERTY(Category = Wall, EditAnywhere)
+		TSubclassOf<class AActor> FloorPrefab;
 
 	UPROPERTY(Category = Wall, EditAnywhere)
 		TSubclassOf<class AActor> TestDoorPrefab;

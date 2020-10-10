@@ -21,6 +21,9 @@ APlayerCharacter::APlayerCharacter()
 
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	PlayerCamera->SetupAttachment(CameraSpringArm);
+
+	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
+	GroundCheckPoint->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -41,7 +44,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdatePlayerModel();
+	CheckIsOnGround();
+
 	_playerModel->SetActorLocation(GetActorLocation() + ModelPositionOffset);
+	PlayerModel = _playerModel->PlayerMeshComponent;
 }
 
 // Called to bind functionality to input
@@ -79,12 +85,34 @@ void APlayerCharacter::TurnPlayer(float inputValue)
 
 void APlayerCharacter::LookUpPlayer(float inputValue)
 {
-	AddControllerPitchInput(LookUpSpeed * inputValue * GetWorld()->GetDeltaSeconds());
+	AddControllerPitchInput(LookUpSpeed * -inputValue * GetWorld()->GetDeltaSeconds());
 }
 
 void APlayerCharacter::JumpPlayer()
 {
+	OnPlayerJumped.Broadcast();
 	Jump();
+}
+
+void APlayerCharacter::CheckIsOnGround()
+{
+	FVector startPosition = GroundCheckPoint->GetComponentLocation();
+	FVector endPosition = startPosition + FVector::DownVector * GroundCheckDistance;
+
+	FHitResult result;
+	FCollisionQueryParams collisionParams;
+
+	IsOnGround = GetWorld()->LineTraceSingleByChannel(result, startPosition, endPosition, ECollisionChannel::ECC_Visibility, collisionParams);
+	if (IsOnGround) {
+		if (!_isGrounded) {
+			OnPlayerLanded.Broadcast();
+		}
+
+		_isGrounded = true;
+	}
+	else {
+		_isGrounded = false;
+	}
 }
 
 void APlayerCharacter::UpdatePlayerModel()

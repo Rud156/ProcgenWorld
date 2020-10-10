@@ -23,5 +23,7 @@ void APlayerModel::BeginPlay()
 void APlayerModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	PlayerMeshComponent = PlayerMesh;
 }
 

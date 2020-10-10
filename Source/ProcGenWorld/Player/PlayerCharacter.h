@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class APlayerModel;
+
 UCLASS()
 class PROCGENWORLD_API APlayerCharacter : public ACharacter
 {
@@ -17,6 +19,17 @@ class PROCGENWORLD_API APlayerCharacter : public ACharacter
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
 		class UCameraComponent* PlayerCamera;
 
+	APlayerModel* _playerModel;
+
+	const float FloatTolerance = 0.001f;
+
+	float _currentZRotation;
+	float _targetZRotation;
+	float _lerpAmount;
+
+	float _moveZ;
+	float _moveX;
+
 #pragma region Player Movement
 
 	void MoveVertical(float inputValue);
@@ -25,9 +38,12 @@ class PROCGENWORLD_API APlayerCharacter : public ACharacter
 	void LookUpPlayer(float inputValue);
 
 	void JumpPlayer();
-	void CrouchPlayer();
+	void UpdatePlayerModel();
 
 #pragma endregion
+
+	float LerpAngleDeg(float fromDegrees, float toDegrees, float progress);
+	float To360Angle(float angle);
 
 public:
 #pragma region Parameters
@@ -37,6 +53,15 @@ public:
 
 	UPROPERTY(Category = Movement, EditAnywhere)
 		float LookUpSpeed;
+
+	UPROPERTY(Category = Model, EditAnywhere)
+		float ModelLerpSpeed;
+
+	UPROPERTY(Category = Model, EditAnywhere)
+		FVector ModelPositionOffset;
+
+	UPROPERTY(Category = Model, EditAnywhere)
+		float ModelRotationOffset;
 
 #pragma endregion
 

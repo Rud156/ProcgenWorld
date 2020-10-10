@@ -30,6 +30,9 @@ void APlayerCharacter::BeginPlay()
 
 	auto modelActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerModel::StaticClass());
 	_playerModel = Cast<APlayerModel>(modelActor);
+
+	float rotationAngle = ModelRotationOffset + GetActorRotation().Yaw;
+	_playerModel->SetActorRotation(FRotator(0, rotationAngle, 0));
 }
 
 // Called every frame

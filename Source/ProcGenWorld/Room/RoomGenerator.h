@@ -14,6 +14,7 @@ class PROCGENWORLD_API ARoomGenerator : public AActor
 private:
 	int _rowCount;
 	int _columnCount;
+	TMap<int, TMap<int, FWindowsPlatformTypes::TCHAR>> _room;
 
 	FVector _startPosition;
 
@@ -32,6 +33,9 @@ private:
 	bool _isLerpActive;
 
 	void RenderRoomFromString(FString roomString, FVector startPosition);
+	void GenerateRoomMatrix(FString roomString);
+	void RenderRoomEdges(FVector startPosition);
+	void RenderOtherRoomParts(FVector startPosition);
 
 public:
 #pragma region Parameters
@@ -86,10 +90,10 @@ public:
 	int GetColumnCount();
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
-	AActor* GetFloor();
+		AActor* GetFloor();
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
-	TArray<AActor*> GetWalls();
+		TArray<AActor*> GetWalls();
 
 	UFUNCTION(Category = Display, BlueprintCallable)
 		void SetFloorColor(int roomType, UStaticMeshComponent* mesh);

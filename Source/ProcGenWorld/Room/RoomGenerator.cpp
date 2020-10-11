@@ -21,9 +21,14 @@ void ARoomGenerator::BeginPlay()
 	_leftColumnDoorPosition = FVector::ZeroVector;
 	_rightColumnDoorPosition = FVector::ZeroVector;
 
+	_room = TMap<int, TMap<int, FWindowsPlatformTypes::TCHAR>>();
+
 	_walls = TArray<AActor*>();
 	_floor = nullptr;
+
 	_isLerpActive = false;
+
+	//LoadRoomFromFile("C_B", FVector(0, 0, 800));
 }
 
 void ARoomGenerator::Destroyed()
@@ -81,129 +86,247 @@ void ARoomGenerator::RenderRoomFromString(FString roomString, FVector startPosit
 {
 	_startPosition = startPosition;
 
-	FVector currentPosition = startPosition;
-	FRotator rotation90 = FRotator(0, 90, 0);
+	GenerateRoomMatrix(roomString);
+	RenderRoomEdges(startPosition);
+	//RenderOtherRoomParts(startPosition);
+}
 
-	bool lastSpawnVertical = false;
+void ARoomGenerator::GenerateRoomMatrix(FString roomString)
+{
+	int currentRowIndex = 0;
+	int currentColumnIndex = 0;
 
-	int rowCount = 0;
-	int columnCount = 0;
-	bool rowCountCalculated = false;
+	int maxColumns = 0;
 
-	bool topDoorPositionCalculated = false;
-	bool bottomDoorPositionCalculated = false;
-	bool leftDoorPositionCalculated = false;
-	bool rightDoorPositionCalculated = false;
+	for (int i = 0; i < roomString.Len(); i++) {
+		auto letter = roomString[i];
 
-
-	int stringIndex = 0;
-	while (stringIndex < roomString.Len())
-	{
-		auto letter = roomString[stringIndex];
-
-		if (letter == '-')
-		{
-			AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &FRotator::ZeroRotator);
-			wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-			_walls.Add(wallInstance);
-
-			currentPosition.X += WallWidth;
-			lastSpawnVertical = false;
-		}
-		else if (letter == '|')
-		{
-			auto nextLetter = roomString[stringIndex + 1];
-
-			if (nextLetter != ' ') {
-				currentPosition.X += WallWidth - WallThickness * 1.25f;
-			}
-
-			AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &rotation90);
-			wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-			_walls.Add(wallInstance);
-
-			currentPosition.X += WallWidth;
-			lastSpawnVertical = true;
-		}
-		else if (letter == '\n')
-		{
-			auto nextLetter = roomString[stringIndex + 1];
-			if (nextLetter == '-') {
-				leftDoorPositionCalculated = true;
-				rightDoorPositionCalculated = true;
-
-				currentPosition.X = startPosition.X;
-			}
-			else {
-				currentPosition.X = startPosition.X + WallThickness * 1.125f;
-			}
-
-			if (!lastSpawnVertical) {
-				currentPosition.Y += WallThickness;
-			}
-			else {
-				currentPosition.Y += WallWidth;
-			}
-
-
-
-			columnCount += 1;
-			rowCountCalculated = true;
-			topDoorPositionCalculated = true;
-		}
-		else if (letter == 'X') {
-			auto nextLetter = ' ';
-			if (stringIndex + 1 < roomString.Len()) {
-				nextLetter = roomString[stringIndex + 1];
-			}
-
-			if (!topDoorPositionCalculated) {
-				_topRowDoorPosition = currentPosition;
-			}
-			else if (!leftDoorPositionCalculated || !rightDoorPositionCalculated) {
-				if (nextLetter == ' ') {
-					_leftColumnDoorPosition = currentPosition;
-					leftDoorPositionCalculated = true;
-				}
-				else {
-					_rightColumnDoorPosition = currentPosition;
-					_rightColumnDoorPosition.X += WallWidth - WallThickness * 1.25f;
-					rightDoorPositionCalculated = true;
-				}
-			}
-			else if (!bottomDoorPositionCalculated) {
-				_bottomRowDoorPosition = currentPosition;
-				bottomDoorPositionCalculated = true;
-			}
-
-			currentPosition.X += WallWidth;
-		}
-		else if (letter == ' ')
-		{
-			currentPosition.X += WallWidth;
+		if (!_room.Contains(currentRowIndex)) {
+			_room.Add(currentRowIndex, TMap<int, FWindowsPlatformTypes::TCHAR>());
 		}
 
-		stringIndex += 1;
-		if (!rowCountCalculated) {
-			rowCount += 1;
+		if (letter == '\r') {
+			currentRowIndex += 1;
+			currentColumnIndex = 0;
+
+			i += 1;
+		}
+		else if (letter == '\n') {
+			currentRowIndex += 1;
+			currentColumnIndex = 0;
+		}
+		else {
+			if (maxColumns < currentColumnIndex) {
+				maxColumns = currentColumnIndex;
+			}
+
+			//GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "Column: " + FString::SanitizeFloat(currentColumnIndex) + ", Letter: " + letter);
+			_room[currentRowIndex].Add(currentColumnIndex, letter);
+			currentColumnIndex += 1;
 		}
 	}
 
-	columnCount += 1;
-	rowCount -= 1;
+	_rowCount = currentRowIndex;
+	_columnCount = maxColumns;
 
-	_rowCount = rowCount;
-	_columnCount = columnCount;
+	//GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "Row: " + FString::SanitizeFloat(_rowCount));
+	//GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "Column: " + FString::SanitizeFloat(_columnCount));
+}
+
+void ARoomGenerator::RenderRoomEdges(FVector startPosition)
+{
+	FRotator rotation90 = FRotator(0, 90, 0);
+
+	// Top Row
+	FVector topPosition = startPosition;
+	for (int i = 0; i <= _columnCount; i++) {
+		if (_room[0].Contains(i)) {
+			auto letter = _room[0][i];
+
+			if (letter == '-') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &topPosition, &FRotator::ZeroRotator);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				topPosition.X += WallWidth;
+			}
+			else if (letter == '|') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &topPosition, &rotation90);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				topPosition.X += WallWidth;
+			}
+			else if (letter == 'X') {
+				_topRowDoorPosition = topPosition;
+				topPosition.X += WallWidth;
+			}
+		}
+	}
+
+	// Bottom Row
+	FVector bottomPosition = FVector(startPosition.X, startPosition.Y + (_rowCount - 1) * WallWidth + WallThickness, startPosition.Z);
+	for (int i = 0; i <= _columnCount; i++) {
+		if (_room[_rowCount].Contains(i)) {
+			auto letter = _room[_rowCount][i];
+
+			if (letter == '-') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &bottomPosition, &FRotator::ZeroRotator);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				bottomPosition.X += WallWidth;
+			}
+			else if (letter == '|') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &bottomPosition, &rotation90);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				bottomPosition.X += WallWidth;
+			}
+			else if (letter == 'X') {
+				_bottomRowDoorPosition = bottomPosition;
+				bottomPosition.X += WallWidth;
+			}
+		}
+	}
+
+
+	FRotator rotation45 = FRotator(0, 45, 0);
+	FRotator rotation135 = FRotator(0, 135, 0);
+
+	// Left Row
+	FVector leftPosition = FVector(startPosition.X + WallThickness * 1.15f, startPosition.Y + WallThickness, startPosition.Z);
+	for (int i = 1; i < _rowCount; i++) {
+		if (_room[i].Contains(0)) {
+			auto letter = _room[i][0];
+
+			if (letter == '|') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &leftPosition, &rotation90);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				leftPosition.Y += WallWidth;
+			}
+			else if (letter == '-') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &leftPosition, &FRotator::ZeroRotator);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				leftPosition.Y += WallWidth;
+			}
+			else if (letter == '\\') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &leftPosition, &rotation45);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				leftPosition.Y += WallWidth;
+			}
+			else if (letter == '/') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &leftPosition, &rotation135);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				leftPosition.Y += WallWidth;
+			}
+			else if (letter == 'X') {
+				_leftColumnDoorPosition = leftPosition;
+				leftPosition.Y += WallWidth;
+			}
+		}
+	}
+
+	// Right Row
+	FVector rightPosition = FVector(startPosition.X + (_columnCount + 1) * WallWidth - WallThickness * 0.1f, startPosition.Y + WallThickness, startPosition.Z);
+	for (int i = 1; i < _rowCount; i++) {
+		if (_room[i].Contains(_columnCount)) {
+			auto letter = _room[i][_columnCount];
+
+			if (letter == '|') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &rightPosition, &rotation90);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				rightPosition.Y += WallWidth;
+			}
+			else if (letter == '-') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &rightPosition, &FRotator::ZeroRotator);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				rightPosition.Y += WallWidth;
+			}
+			else if (letter == '\\') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &rightPosition, &rotation45);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				rightPosition.Y += WallWidth;
+			}
+			else if (letter == '/') {
+				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &rightPosition, &rotation135);
+				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				_walls.Add(wallInstance);
+
+				rightPosition.Y += WallWidth;
+			}
+			else if (letter == 'X') {
+				_rightColumnDoorPosition = rightPosition;
+				rightPosition.Y += WallWidth;
+			}
+		}
+	}
 
 	AActor* floorInstance = GetWorld()->SpawnActor(FloorPrefab, &_startPosition, &FRotator::ZeroRotator);
-	floorInstance->SetActorScale3D(FVector(_rowCount, _columnCount - 2, 1));
+	floorInstance->SetActorScale3D(FVector(_rowCount + 1, _columnCount - 1, 1));
 	floorInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	_floor = floorInstance;
+}
 
-	//GetWorld()->SpawnActor(TestDoorPrefab, &_topRowDoorPosition, &FRotator::ZeroRotator);
-	//GetWorld()->SpawnActor(TestDoorPrefab, &_leftColumnDoorPosition, &FRotator::ZeroRotator);
-	//GetWorld()->SpawnActor(TestDoorPrefab, &_rightColumnDoorPosition, &FRotator::ZeroRotator);
-	//GetWorld()->SpawnActor(TestDoorPrefab, &_bottomRowDoorPosition, &FRotator::ZeroRotator);
+void ARoomGenerator::RenderOtherRoomParts(FVector startPosition)
+{
+	FVector currentPosition = startPosition;
+	currentPosition.X += WallThickness;
+	currentPosition.Y += WallThickness;
+
+	FRotator rotation90 = FRotator(0, 90, 0);
+	FRotator rotation45 = FRotator(0, 45, 0);
+	FRotator rotation135 = FRotator(0, 135, 0);
+
+	for (int i = 1; i < _rowCount; i++) {
+		for (int j = 1; j < _columnCount; j++) {
+			if (_room[i].Contains(j)) {
+
+				auto letter = _room[i][j];
+
+				if (letter == '/') {
+					AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &rotation135);
+					wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+					_walls.Add(wallInstance);
+				}
+				else if (letter == '\\') {
+					AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &rotation45);
+					wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+					_walls.Add(wallInstance);
+				}
+				else if (letter == '-') {
+					AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &FRotator::ZeroRotator);
+					wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+					_walls.Add(wallInstance);
+				}
+				else if (letter == '|') {
+					AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &rotation90);
+					wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+					_walls.Add(wallInstance);
+				}
+
+				currentPosition.X += WallWidth;
+			}
+		}
+
+		currentPosition.X = startPosition.X + WallThickness;
+		currentPosition.Y += WallWidth;
+	}
 }
 
 FString ARoomGenerator::GetRoomName()

@@ -10,6 +10,7 @@
 #include "GameFramework/DefaultPawn.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/TriggerBox.h"
 
 // Sets default values
 APlayerSpawn::APlayerSpawn()
@@ -23,6 +24,12 @@ APlayerSpawn::APlayerSpawn()
 void APlayerSpawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AActor* triggerActor = GetWorld()->SpawnActor(TriggerBoxPrefab, &FVector::ZeroVector, &FRotator::ZeroRotator);
+	_victoryTrigger = Cast<ATriggerBox>(triggerActor);
+	if (_victoryTrigger == nullptr) {
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "Trigger Box Not Found!!!");
+	}
 
 	auto defaultPawn = UGameplayStatics::GetActorOfClass(GetWorld(), ADefaultPawn::StaticClass());
 	_defaultPawn = Cast<ADefaultPawn>(defaultPawn);
@@ -71,9 +78,9 @@ void APlayerSpawn::SpawnPlayer()
 
 	int spawnRow = _dungeonGen->GetSpawnRow();
 	int spawnColumn = _dungeonGen->GetSpawnColumn();
-	ARoomGenerator* roomGenerator = _dungeonGen->GetRoom(spawnRow, spawnColumn);
+	ARoomGenerator* spawnRoom = _dungeonGen->GetRoom(spawnRow, spawnColumn);
 
-	FVector startPosition = roomGenerator->GetStartPosition();
+	FVector startPosition = spawnRoom->GetStartPosition();
 	startPosition += SpawnOffset;
 
 	AActor* playerModelActor = GetWorld()->SpawnActor(PlayerModelPrefab, &startPosition, &FRotator::ZeroRotator);
@@ -85,4 +92,11 @@ void APlayerSpawn::SpawnPlayer()
 	APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	controller->UnPossess();
 	controller->Possess(_playerCharacter);
+
+	int exitRow = _dungeonGen->GetExitRow();
+	int exitColumn = _dungeonGen->GetExitColumn();
+	ARoomGenerator* exitRoom = _dungeonGen->GetRoom(exitRow, exitColumn);
+
+	_victoryTrigger->SetActorLocation(exitRoom->GetStartPosition() + TriggerBoxSpawnOffset);
+	_victoryTrigger->SetActorScale3D(TriggerBoxSpawnScale);
 }

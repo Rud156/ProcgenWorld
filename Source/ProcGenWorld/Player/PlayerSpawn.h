@@ -10,6 +10,7 @@ class ADungeonGenerator;
 class APlayerCharacter;
 class APlayerModel;
 class ADefaultPawn;
+class ATriggerBox;
 
 UCLASS()
 class PROCGENWORLD_API APlayerSpawn : public AActor
@@ -21,6 +22,8 @@ class PROCGENWORLD_API APlayerSpawn : public AActor
 	APlayerModel* _playerModel;
 	APlayerCharacter* _playerCharacter;
 	ADefaultPawn* _defaultPawn;
+
+	ATriggerBox* _victoryTrigger;
 
 
 	UFUNCTION()
@@ -41,10 +44,19 @@ public:
 		TSubclassOf<class APlayerModel> PlayerModelPrefab;
 
 	UPROPERTY(Category = Spawn, EditAnywhere)
+		TSubclassOf<class ATriggerBox> TriggerBoxPrefab;
+
+	UPROPERTY(Category = Spawn, EditAnywhere)
 		FVector SpawnOffset;
 
 	UPROPERTY(Category = Spawn, EditAnywhere)
 		float PlayerSpawnDelay;
+
+	UPROPERTY(Category = TriggerCollision, EditAnywhere)
+		FVector TriggerBoxSpawnOffset;
+
+	UPROPERTY(Category = TriggerCollision, EditAnywhere)
+		FVector TriggerBoxSpawnScale;
 
 	// Sets default values for this actor's properties
 	APlayerSpawn();

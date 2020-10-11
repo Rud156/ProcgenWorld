@@ -25,8 +25,10 @@ void ADungeonGenerator::BeginPlay()
 		_stream = FRandomStream(CustomSeed);
 	}
 
-	GenerateRoomBase();
-	SpawnRooms();
+	_minRow = 999;
+	_maxRow = -1;
+	_minColumn = 999;
+	_maxColumn = -1;
 }
 
 // Called every frame
@@ -74,23 +76,54 @@ void ADungeonGenerator::SetSearchDepth(int i_searchDepth)
 
 void ADungeonGenerator::RegenrateRooms()
 {
+	OnGenerationStarted.Broadcast();
+
 	if (!UseCustomSeed) {
 		_randomSeed = FMath::Rand();
 	}
 
 	_stream = FRandomStream(_randomSeed);
 
-	for (int i = _minRow; i <= _maxRow; i++) {
-		for (int j = _minColumn; j <= _maxColumn; j++) {
-			if (_rooms[i].Contains(j)) {
-				auto roomGenerator = _rooms[i][j];
-				roomGenerator->Destroy();
+	if (_maxRow != -1) {
+		for (int i = _minRow; i <= _maxRow; i++) {
+			for (int j = _minColumn; j <= _maxColumn; j++) {
+				if (_rooms[i].Contains(j)) {
+					auto roomGenerator = _rooms[i][j];
+					roomGenerator->Destroy();
+				}
 			}
 		}
 	}
 
 	GenerateRoomBase();
 	SpawnRooms();
+
+	OnGenerationComplete.Broadcast();
+}
+
+ARoomGenerator* ADungeonGenerator::GetRoom(int row, int column)
+{
+	return _rooms[row][column];
+}
+
+int ADungeonGenerator::GetSpawnRow()
+{
+	return _spawnRoomRow;
+}
+
+int ADungeonGenerator::GetSpawnColumn()
+{
+	return _spawnRoomColumn;
+}
+
+int ADungeonGenerator::GetExitRow()
+{
+	return _exitRoomRow;
+}
+
+int ADungeonGenerator::GetExitColumn()
+{
+	return _exitRoomColumn;
 }
 
 void ADungeonGenerator::GenerateRoomBase()

@@ -10,6 +10,9 @@
 
 class ARoomGenerator;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGenerationComplete);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGenerationStarted);
+
 UCLASS()
 class PROCGENWORLD_API ADungeonGenerator : public AActor
 {
@@ -108,6 +111,12 @@ public:
 	UPROPERTY(Category = Rooms, EditAnywhere)
 		TSubclassOf<class ARoomGenerator> RoomGenerator;
 
+	UPROPERTY(Category = Delegates, BlueprintAssignable)
+		FGenerationComplete OnGenerationComplete;
+
+	UPROPERTY(Category = Delegates, BlueprintAssignable)
+		FGenerationStarted OnGenerationStarted;
+
 #pragma endregion
 
 	// Sets default values for this actor's properties
@@ -127,7 +136,7 @@ public:
 
 	UFUNCTION(Category = Rooms, BlueprintCallable)
 		void SetCustomSeedStatus(bool i_useCustomSeed);
-	
+
 	UFUNCTION(Category = Rooms, BlueprintCallable)
 		void SetCustomSeed(int i_customSeed);
 
@@ -136,6 +145,14 @@ public:
 
 	UFUNCTION(Category = Rooms, BlueprintCallable)
 		void RegenrateRooms();
+
+	ARoomGenerator* GetRoom(int row, int column);
+
+	int GetSpawnRow();
+	int GetSpawnColumn();
+
+	int GetExitRow();
+	int GetExitColumn();
 
 
 protected:

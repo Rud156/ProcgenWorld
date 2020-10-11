@@ -35,7 +35,6 @@ private:
 	void RenderRoomFromString(FString roomString, FVector startPosition);
 	void GenerateRoomMatrix(FString roomString);
 	void RenderRoomEdges(FVector startPosition);
-	void RenderOtherRoomParts(FVector startPosition);
 
 public:
 #pragma region Parameters

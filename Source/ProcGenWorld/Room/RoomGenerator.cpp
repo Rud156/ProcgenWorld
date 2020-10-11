@@ -27,8 +27,6 @@ void ARoomGenerator::BeginPlay()
 	_floor = nullptr;
 
 	_isLerpActive = false;
-
-	//LoadRoomFromFile("C_B", FVector(0, 0, 800));
 }
 
 void ARoomGenerator::Destroyed()
@@ -88,7 +86,6 @@ void ARoomGenerator::RenderRoomFromString(FString roomString, FVector startPosit
 
 	GenerateRoomMatrix(roomString);
 	RenderRoomEdges(startPosition);
-	//RenderOtherRoomParts(startPosition);
 }
 
 void ARoomGenerator::GenerateRoomMatrix(FString roomString)
@@ -120,7 +117,6 @@ void ARoomGenerator::GenerateRoomMatrix(FString roomString)
 				maxColumns = currentColumnIndex;
 			}
 
-			//GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "Column: " + FString::SanitizeFloat(currentColumnIndex) + ", Letter: " + letter);
 			_room[currentRowIndex].Add(currentColumnIndex, letter);
 			currentColumnIndex += 1;
 		}
@@ -128,9 +124,6 @@ void ARoomGenerator::GenerateRoomMatrix(FString roomString)
 
 	_rowCount = currentRowIndex;
 	_columnCount = maxColumns;
-
-	//GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "Row: " + FString::SanitizeFloat(_rowCount));
-	//GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "Column: " + FString::SanitizeFloat(_columnCount));
 }
 
 void ARoomGenerator::RenderRoomEdges(FVector startPosition)
@@ -145,13 +138,6 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 
 			if (letter == '-') {
 				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &topPosition, &FRotator::ZeroRotator);
-				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-				_walls.Add(wallInstance);
-
-				topPosition.X += WallWidth;
-			}
-			else if (letter == '|') {
-				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &topPosition, &rotation90);
 				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 				_walls.Add(wallInstance);
 
@@ -177,23 +163,12 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 
 				bottomPosition.X += WallWidth;
 			}
-			else if (letter == '|') {
-				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &bottomPosition, &rotation90);
-				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-				_walls.Add(wallInstance);
-
-				bottomPosition.X += WallWidth;
-			}
 			else if (letter == 'X') {
 				_bottomRowDoorPosition = bottomPosition;
 				bottomPosition.X += WallWidth;
 			}
 		}
 	}
-
-
-	FRotator rotation45 = FRotator(0, 45, 0);
-	FRotator rotation135 = FRotator(0, 135, 0);
 
 	// Left Row
 	FVector leftPosition = FVector(startPosition.X + WallThickness * 1.15f, startPosition.Y + WallThickness, startPosition.Z);
@@ -203,27 +178,6 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 
 			if (letter == '|') {
 				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &leftPosition, &rotation90);
-				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-				_walls.Add(wallInstance);
-
-				leftPosition.Y += WallWidth;
-			}
-			else if (letter == '-') {
-				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &leftPosition, &FRotator::ZeroRotator);
-				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-				_walls.Add(wallInstance);
-
-				leftPosition.Y += WallWidth;
-			}
-			else if (letter == '\\') {
-				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &leftPosition, &rotation45);
-				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-				_walls.Add(wallInstance);
-
-				leftPosition.Y += WallWidth;
-			}
-			else if (letter == '/') {
-				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &leftPosition, &rotation135);
 				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 				_walls.Add(wallInstance);
 
@@ -249,27 +203,6 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 
 				rightPosition.Y += WallWidth;
 			}
-			else if (letter == '-') {
-				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &rightPosition, &FRotator::ZeroRotator);
-				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-				_walls.Add(wallInstance);
-
-				rightPosition.Y += WallWidth;
-			}
-			else if (letter == '\\') {
-				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &rightPosition, &rotation45);
-				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-				_walls.Add(wallInstance);
-
-				rightPosition.Y += WallWidth;
-			}
-			else if (letter == '/') {
-				AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &rightPosition, &rotation135);
-				wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-				_walls.Add(wallInstance);
-
-				rightPosition.Y += WallWidth;
-			}
 			else if (letter == 'X') {
 				_rightColumnDoorPosition = rightPosition;
 				rightPosition.Y += WallWidth;
@@ -281,52 +214,6 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 	floorInstance->SetActorScale3D(FVector(_rowCount + 1, _columnCount - 1, 1));
 	floorInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	_floor = floorInstance;
-}
-
-void ARoomGenerator::RenderOtherRoomParts(FVector startPosition)
-{
-	FVector currentPosition = startPosition;
-	currentPosition.X += WallThickness;
-	currentPosition.Y += WallThickness;
-
-	FRotator rotation90 = FRotator(0, 90, 0);
-	FRotator rotation45 = FRotator(0, 45, 0);
-	FRotator rotation135 = FRotator(0, 135, 0);
-
-	for (int i = 1; i < _rowCount; i++) {
-		for (int j = 1; j < _columnCount; j++) {
-			if (_room[i].Contains(j)) {
-
-				auto letter = _room[i][j];
-
-				if (letter == '/') {
-					AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &rotation135);
-					wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-					_walls.Add(wallInstance);
-				}
-				else if (letter == '\\') {
-					AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &rotation45);
-					wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-					_walls.Add(wallInstance);
-				}
-				else if (letter == '-') {
-					AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &FRotator::ZeroRotator);
-					wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-					_walls.Add(wallInstance);
-				}
-				else if (letter == '|') {
-					AActor* wallInstance = GetWorld()->SpawnActor(WallPrefab, &currentPosition, &rotation90);
-					wallInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-					_walls.Add(wallInstance);
-				}
-
-				currentPosition.X += WallWidth;
-			}
-		}
-
-		currentPosition.X = startPosition.X + WallThickness;
-		currentPosition.Y += WallWidth;
-	}
 }
 
 FString ARoomGenerator::GetRoomName()

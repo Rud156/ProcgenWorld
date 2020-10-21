@@ -48,6 +48,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	_playerModel->SetActorLocation(GetActorLocation() + ModelPositionOffset);
 	PlayerModel = _playerModel->PlayerMeshComponent;
+
+	if (_currentInputLockDelay > 0) {
+		_currentInputLockDelay -= DeltaTime;
+	}
 }
 
 // Called to bind functionality to input
@@ -56,11 +60,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	check(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("Vertical", this, &APlayerCharacter::MoveVertical);
-	PlayerInputComponent->BindAxis("Horizontal", this, &APlayerCharacter::MoveHorizontal);
+	//PlayerInputComponent->BindAxis("Vertical", this, &APlayerCharacter::MoveVertical);
+	//PlayerInputComponent->BindAxis("Horizontal", this, &APlayerCharacter::MoveHorizontal);
 	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::TurnPlayer);
 	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::LookUpPlayer);
 
+	PlayerInputComponent->BindAction("Up", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveUp);
+	PlayerInputComponent->BindAction("Down", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveDown);
+	PlayerInputComponent->BindAction("Left", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveLeft);
+	PlayerInputComponent->BindAction("Right", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveRight);
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerCharacter::JumpPlayer);
 }
 
@@ -153,6 +161,34 @@ float APlayerCharacter::To360Angle(float angle)
 		angle -= 360.0f;
 
 	return angle;
+}
+
+#pragma endregion
+
+#pragma region External Movement
+
+void APlayerCharacter::MoveUp()
+{
+	_currentInputLockDelay = InputLockTime;
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Move Up");
+}
+
+void APlayerCharacter::MoveDown()
+{
+	_currentInputLockDelay = InputLockTime;
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Move Down");
+}
+
+void APlayerCharacter::MoveLeft()
+{
+	_currentInputLockDelay = InputLockTime;
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Move Left");
+}
+
+void APlayerCharacter::MoveRight()
+{
+	_currentInputLockDelay = InputLockTime;
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Move Right");
 }
 
 #pragma endregion

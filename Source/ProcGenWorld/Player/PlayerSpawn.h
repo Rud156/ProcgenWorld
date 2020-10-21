@@ -12,6 +12,8 @@ class APlayerModel;
 class ADefaultPawn;
 class ATriggerBox;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPlayerSpawnComplete, APlayerCharacter*, PlayerCharacter);
+
 UCLASS()
 class PROCGENWORLD_API APlayerSpawn : public AActor
 {
@@ -57,6 +59,9 @@ public:
 
 	UPROPERTY(Category = TriggerCollision, EditAnywhere)
 		FVector TriggerBoxSpawnScale;
+
+	UPROPERTY(Category = Spawning, BlueprintAssignable)
+		FPlayerSpawnComplete OnPlayerSpawnComplete;
 
 	// Sets default values for this actor's properties
 	APlayerSpawn();

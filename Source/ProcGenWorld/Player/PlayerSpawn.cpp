@@ -17,7 +17,6 @@ APlayerSpawn::APlayerSpawn()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -62,9 +61,6 @@ void APlayerSpawn::RoomGeneratonComplete()
 
 void APlayerSpawn::RoomGenerationStarted()
 {
-	APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	controller->UnPossess();
-	controller->Possess(_defaultPawn);
 }
 
 void APlayerSpawn::SpawnPlayer()
@@ -89,14 +85,13 @@ void APlayerSpawn::SpawnPlayer()
 	_playerModel = Cast<APlayerModel>(playerModelActor);
 	_playerCharacter = Cast<APlayerCharacter>(playerCharacterActor);
 
-	APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	controller->UnPossess();
-	controller->Possess(_playerCharacter);
-
 	int exitRow = _dungeonGen->GetExitRow();
 	int exitColumn = _dungeonGen->GetExitColumn();
 	ARoomGenerator* exitRoom = _dungeonGen->GetRoom(exitRow, exitColumn);
 
 	_victoryTrigger->SetActorLocation(exitRoom->GetStartPosition() + TriggerBoxSpawnOffset);
 	_victoryTrigger->SetActorScale3D(TriggerBoxSpawnScale);
+
+	OnPlayerSpawnComplete.Broadcast(_playerCharacter);
+
 }

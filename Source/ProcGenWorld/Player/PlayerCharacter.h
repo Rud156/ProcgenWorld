@@ -38,6 +38,8 @@ class PROCGENWORLD_API APlayerCharacter : public ACharacter
 
 	bool _isGrounded;
 
+	float _currentInputLockDelay;
+
 #pragma region Player Movement
 
 	void MoveVertical(float inputValue);
@@ -71,6 +73,9 @@ public:
 	UPROPERTY(Category = Movement, BlueprintReadonly)
 		bool IsOnGround;
 
+	UPROPERTY(Category = Movement, EditAnywhere)
+		float InputLockTime;
+
 	UPROPERTY(Category = Movement, BlueprintReadonly)
 		USkeletalMeshComponent* PlayerModel;
 
@@ -91,6 +96,15 @@ public:
 
 	UPROPERTY(Category = Delegates, BlueprintAssignable)
 		FLandDelegate OnPlayerLanded;
+
+#pragma endregion
+
+#pragma region External Movement
+
+	void MoveUp();
+	void MoveDown();
+	void MoveLeft();
+	void MoveRight();
 
 #pragma endregion
 

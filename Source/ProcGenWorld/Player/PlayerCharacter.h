@@ -7,9 +7,11 @@
 #include "PlayerCharacter.generated.h"
 
 class APlayerModel;
+class ATile;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FJumpDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLandDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMoveDelegate, FVector, TargetLocation);
 
 UCLASS()
 class PROCGENWORLD_API APlayerCharacter : public ACharacter
@@ -97,6 +99,9 @@ public:
 	UPROPERTY(Category = Delegates, BlueprintAssignable)
 		FLandDelegate OnPlayerLanded;
 
+	UPROPERTY(Category = Delegates, BlueprintAssignable)
+		FMoveDelegate OnPlayerMoved;
+
 #pragma endregion
 
 #pragma region External Movement
@@ -105,6 +110,9 @@ public:
 	void MoveDown();
 	void MoveLeft();
 	void MoveRight();
+
+	void SetPlayerCamera(APlayerController* playerController);
+	void HandleMouseClicked(FHitResult hitResult, ATile* tile);
 
 #pragma endregion
 

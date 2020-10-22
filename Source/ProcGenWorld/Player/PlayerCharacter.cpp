@@ -3,8 +3,11 @@
 
 #include "PlayerCharacter.h"
 #include "PlayerModel.h"
+#include "AIPlayerController.h"
+#include "../Room/Tile.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -58,18 +61,19 @@ void APlayerCharacter::Tick(float DeltaTime)
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	check(PlayerInputComponent);
+	//check(PlayerInputComponent);
 
 	//PlayerInputComponent->BindAxis("Vertical", this, &APlayerCharacter::MoveVertical);
 	//PlayerInputComponent->BindAxis("Horizontal", this, &APlayerCharacter::MoveHorizontal);
-	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::TurnPlayer);
-	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::LookUpPlayer);
+	//PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::TurnPlayer);
+	//PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::LookUpPlayer);
 
-	PlayerInputComponent->BindAction("Up", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveUp);
-	PlayerInputComponent->BindAction("Down", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveDown);
-	PlayerInputComponent->BindAction("Left", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveLeft);
-	PlayerInputComponent->BindAction("Right", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveRight);
-	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerCharacter::JumpPlayer);
+	//PlayerInputComponent->BindAction("Up", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveUp);
+	//PlayerInputComponent->BindAction("Down", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveDown);
+	//PlayerInputComponent->BindAction("Left", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveLeft);
+	//PlayerInputComponent->BindAction("Right", EInputEvent::IE_Pressed, this, &APlayerCharacter::MoveRight);
+	//PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerCharacter::JumpPlayer);
+	//PlayerInputComponent->BindAction("LeftClick", EInputEvent::IE_Pressed, this, &APlayerCharacter::HandleMouseClicked);
 }
 
 #pragma region Player Movement
@@ -189,6 +193,32 @@ void APlayerCharacter::MoveRight()
 {
 	_currentInputLockDelay = InputLockTime;
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Move Right");
+}
+
+void APlayerCharacter::SetPlayerCamera(APlayerController* playerController)
+{
+	FViewTargetTransitionParams params;
+	playerController->SetViewTarget(this, params);
+}
+
+void APlayerCharacter::HandleMouseClicked(FHitResult hitResult, ATile* tile)
+{
+	if (_currentInputLockDelay > 0) {
+		return;
+	}
+	_currentInputLockDelay = InputLockTime;
+
+	FVector targetLocation = tile->TileCenter;
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, *targetLocation.ToString());
+
+	AAIPlayerController* aiController = Cast<AAIPlayerController>(GetController());
+	if (aiController != nullptr) {
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "AI Controller Exists");
+		OnPlayerMoved.Broadcast(targetLocation);
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "AI Controller Does Not Exists");
+	}
 }
 
 #pragma endregion

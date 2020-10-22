@@ -20,17 +20,8 @@ void APlayerTopDownController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto playerCharacterActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-	APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(playerCharacterActor);
-	if (playerCharacter != nullptr) {
-		_playerCharacter = playerCharacter;
-
-		APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		_playerCharacter->SetPlayerCamera(playerController);
-	}
-	else {
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Player Character Not Found");
-	}
+	FTimerHandle unusedHandle;
+	GetWorldTimerManager().SetTimer(unusedHandle, this, &APlayerTopDownController::DelayedSwitchCamera, 1, false);
 }
 
 // Called every frame
@@ -38,8 +29,10 @@ void APlayerTopDownController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector targetLocation = _playerCharacter->GetActorLocation() + FollowOffset;
-	SetActorLocation(targetLocation);
+	if (_playerCharacter != nullptr) {
+		FVector targetLocation = _playerCharacter->GetActorLocation() + FollowOffset;
+		SetActorLocation(targetLocation);
+	}
 }
 
 // Called to bind functionality to input
@@ -49,6 +42,23 @@ void APlayerTopDownController::SetupPlayerInputComponent(UInputComponent* Player
 	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("LeftClick", EInputEvent::IE_Pressed, this, &APlayerTopDownController::HandleMouseClicked);
+}
+
+void APlayerTopDownController::DelayedSwitchCamera()
+{
+	auto playerCharacterActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+	APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(playerCharacterActor);
+	if (playerCharacter != nullptr) {
+		_playerCharacter = playerCharacter;
+
+		APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		_playerCharacter->SetPlayerCamera(playerController);
+
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Player Character Found");
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Player Character Not Found");
+	}
 }
 
 void APlayerTopDownController::HandleMouseClicked()

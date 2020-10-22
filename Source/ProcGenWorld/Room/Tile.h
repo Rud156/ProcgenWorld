@@ -12,13 +12,13 @@ class PROCGENWORLD_API ATile : public AActor
 	GENERATED_BODY()
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-	USceneComponent* TileParent;
-	
-public:	
+		USceneComponent* TileParent;
+
+public:
 #pragma region Properties
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector TileCenter;
+		FVector TileCenter;
 
 #pragma endregion
 

@@ -25,7 +25,7 @@ private:
 
 	FString _roomName;
 	TArray<AActor*> _walls;
-	AActor* _floor;
+	TArray<AActor*> _floorTiles;
 
 	FVector _lerpStartPositon;
 	FVector _lerpTargetPosition;
@@ -89,7 +89,7 @@ public:
 	int GetColumnCount();
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
-		AActor* GetFloor();
+		TArray<AActor*> GetFloorTiles();
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
 		TArray<AActor*> GetWalls();

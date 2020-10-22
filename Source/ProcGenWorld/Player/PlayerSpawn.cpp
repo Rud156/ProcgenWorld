@@ -4,6 +4,7 @@
 #include "PlayerSpawn.h"
 #include "PlayerModel.h"
 #include "PlayerCharacter.h"
+#include "PlayerTopDownController.h"
 #include "../Room/DungeonGenerator.h"
 #include "../Room/RoomGenerator.h"
 
@@ -61,6 +62,9 @@ void APlayerSpawn::RoomGeneratonComplete()
 
 void APlayerSpawn::RoomGenerationStarted()
 {
+	APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	controller->UnPossess();
+	controller->Possess(_defaultPawn);
 }
 
 void APlayerSpawn::SpawnPlayer()
@@ -70,6 +74,9 @@ void APlayerSpawn::SpawnPlayer()
 	}
 	if (_playerModel != nullptr) {
 		_playerModel->Destroy();
+	}
+	if (_playerTopDownController != nullptr) {
+		_playerTopDownController->Destroy();
 	}
 
 	int spawnRow = _dungeonGen->GetSpawnRow();
@@ -81,9 +88,15 @@ void APlayerSpawn::SpawnPlayer()
 
 	AActor* playerModelActor = GetWorld()->SpawnActor(PlayerModelPrefab, &startPosition, &FRotator::ZeroRotator);
 	AActor* playerCharacterActor = GetWorld()->SpawnActor(PlayerCharacterPrefab, &startPosition, &FRotator::ZeroRotator);
+	AActor* playerTopDownControllerActor = GetWorld()->SpawnActor(PlayerTopDownControllerPrefab, &startPosition, &FRotator::ZeroRotator);
 
 	_playerModel = Cast<APlayerModel>(playerModelActor);
 	_playerCharacter = Cast<APlayerCharacter>(playerCharacterActor);
+	_playerTopDownController = Cast<APlayerTopDownController>(playerTopDownControllerActor);
+
+	APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	controller->UnPossess();
+	controller->Possess(_playerTopDownController);
 
 	int exitRow = _dungeonGen->GetExitRow();
 	int exitColumn = _dungeonGen->GetExitColumn();

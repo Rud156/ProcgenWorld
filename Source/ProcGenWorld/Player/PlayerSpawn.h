@@ -8,6 +8,7 @@
 
 class ADungeonGenerator;
 class APlayerCharacter;
+class APlayerTopDownController;
 class APlayerModel;
 class ADefaultPawn;
 class ATriggerBox;
@@ -23,6 +24,7 @@ class PROCGENWORLD_API APlayerSpawn : public AActor
 
 	APlayerModel* _playerModel;
 	APlayerCharacter* _playerCharacter;
+	APlayerTopDownController* _playerTopDownController;
 	ADefaultPawn* _defaultPawn;
 
 	ATriggerBox* _victoryTrigger;
@@ -44,6 +46,9 @@ public:
 
 	UPROPERTY(Category = Player, EditAnywhere)
 		TSubclassOf<class APlayerModel> PlayerModelPrefab;
+
+	UPROPERTY(Category = Player, EditAnywhere)
+		TSubclassOf<class APlayerTopDownController> PlayerTopDownControllerPrefab;
 
 	UPROPERTY(Category = Spawn, EditAnywhere)
 		TSubclassOf<class ATriggerBox> TriggerBoxPrefab;

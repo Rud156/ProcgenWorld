@@ -24,7 +24,7 @@ void ARoomGenerator::BeginPlay()
 	_room = TMap<int, TMap<int, FWindowsPlatformTypes::TCHAR>>();
 
 	_walls = TArray<AActor*>();
-	_floor = nullptr;
+	_floorTiles = TArray<AActor*>();
 
 	_isLerpActive = false;
 }
@@ -35,8 +35,8 @@ void ARoomGenerator::Destroyed()
 		_walls[i]->Destroy();
 	}
 
-	if (_floor != nullptr) {
-		_floor->Destroy();
+	for (int i = 0; i < _floorTiles.Num(); i++) {
+		_floorTiles[i]->Destroy();
 	}
 }
 
@@ -210,10 +210,20 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 		}
 	}
 
-	AActor* floorInstance = GetWorld()->SpawnActor(FloorPrefab, &_startPosition, &FRotator::ZeroRotator);
-	floorInstance->SetActorScale3D(FVector(_rowCount + 1, _columnCount - 1, 1));
-	floorInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-	_floor = floorInstance;
+	FVector currentPosition = _startPosition;
+
+	for (int i = 0; i < _rowCount - 1; i++) {
+		for (int j = 0; j <= _columnCount; j++) {
+			AActor* floorInstance = GetWorld()->SpawnActor(FloorPrefab, &currentPosition, &FRotator::ZeroRotator);
+			floorInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			_floorTiles.Add(floorInstance);
+
+			currentPosition.X += WallWidth;
+		}
+
+		currentPosition.X = _startPosition.X;
+		currentPosition.Y += WallWidth;
+	}
 }
 
 FString ARoomGenerator::GetRoomName()
@@ -270,9 +280,9 @@ int ARoomGenerator::GetColumnCount()
 	return _columnCount;
 }
 
-AActor* ARoomGenerator::GetFloor()
+TArray<AActor*> ARoomGenerator::GetFloorTiles()
 {
-	return _floor;
+	return _floorTiles;
 }
 
 TArray<AActor*> ARoomGenerator::GetWalls()

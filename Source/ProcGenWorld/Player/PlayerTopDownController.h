@@ -15,6 +15,9 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 
 	APlayerCharacter* _playerCharacter;
 
+	UFUNCTION()
+		void DelayedSwitchCamera();
+
 	void HandleMouseClicked();
 
 protected:

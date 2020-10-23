@@ -23,6 +23,7 @@ private:
 	int _playerRow;
 	int _playerColumn;
 
+	UMaterialInstance* _roomDefaultMaterial;
 	FVector _startPosition;
 
 	FVector _topRowDoorPosition;
@@ -72,6 +73,9 @@ public:
 
 	UPROPERTY(Category = Display, EditAnywhere)
 		UMaterialInstance* GeneralMaterial;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* TileMarkerMaterial;
 
 	UPROPERTY(Category = WallMovement, EditAnywhere)
 		float LerpSpeed;

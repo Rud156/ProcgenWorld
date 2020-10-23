@@ -271,7 +271,7 @@ ATile* ARoomGenerator::GetRandomTileInRoom(int& row, int& column)
 void ARoomGenerator::ClearAllTilesStatus()
 {
 	for (int i = 0; i < _floorTiles.Num(); i++) {
-		_floorTiles[i]->ClearTileMoveableStatus();
+		_floorTiles[i]->ClearTileMoveableStatus(_roomDefaultMaterial);
 	}
 }
 
@@ -299,16 +299,16 @@ void ARoomGenerator::MarkValidSpots(int currentRow, int currentColumn)
 
 
 	if (leftColumn != currentColumn) {
-		_floorMatrix[currentRow][leftColumn]->MarkTileMoveable();
+		_floorMatrix[currentRow][leftColumn]->MarkTileMoveable(TileMarkerMaterial);
 	}
 	if (rightColumn != currentColumn) {
-		_floorMatrix[currentRow][rightColumn]->MarkTileMoveable();
+		_floorMatrix[currentRow][rightColumn]->MarkTileMoveable(TileMarkerMaterial);
 	}
 	if (topRow != currentRow) {
-		_floorMatrix[topRow][currentColumn]->MarkTileMoveable();
+		_floorMatrix[topRow][currentColumn]->MarkTileMoveable(TileMarkerMaterial);
 	}
 	if (bottomRow != currentRow) {
-		_floorMatrix[bottomRow][currentColumn]->MarkTileMoveable();
+		_floorMatrix[bottomRow][currentColumn]->MarkTileMoveable(TileMarkerMaterial);
 	}
 }
 
@@ -382,11 +382,14 @@ void ARoomGenerator::SetFloorColor(int roomType, UStaticMeshComponent* mesh)
 
 	if (roomType == 1) {
 		mesh->SetMaterial(0, SpawnMaterial);
+		_roomDefaultMaterial = SpawnMaterial;
 	}
 	else if (roomType == 2) {
 		mesh->SetMaterial(0, ExitMaterial);
+		_roomDefaultMaterial = ExitMaterial;
 	}
 	else {
 		mesh->SetMaterial(0, GeneralMaterial);
+		_roomDefaultMaterial = GeneralMaterial;
 	}
 }

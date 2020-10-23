@@ -11,13 +11,13 @@ class PROCGENWORLD_API ATile : public AActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		USceneComponent* TileParent;
-
 	bool _isMoveable;
 
 public:
 #pragma region Properties
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadWrite)
+		USceneComponent* TileParent;
 
 	UPROPERTY(BlueprintReadOnly)
 		FVector TileCenter;
@@ -30,9 +30,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(Category = Display, BlueprintImplementableEvent)
+		void SetTileMarkedMaterial(UMaterialInstance* markedMaterial);
+
+	UFUNCTION(Category = Display, BlueprintImplementableEvent)
+		void SetTileUnMarkedMaterial(UMaterialInstance* defaultMaterial);
+
 	bool IsTileMarked();
-	void MarkTileMoveable();
-	void ClearTileMoveableStatus();
+	void MarkTileMoveable(UMaterialInstance* markedMaterial);
+	void ClearTileMoveableStatus(UMaterialInstance* defaultMaterial);
 
 protected:
 	// Called when the game starts or when spawned

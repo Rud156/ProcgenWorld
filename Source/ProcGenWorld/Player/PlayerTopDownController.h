@@ -13,10 +13,10 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
 	GENERATED_BODY()
 
-	APlayerCharacter* _playerCharacter;
+	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
+		class USceneComponent* TopDownSceneComponent;
 
-	UFUNCTION()
-		void DelayedSwitchCamera();
+	APlayerCharacter* _playerCharacter;
 
 	void HandleMouseClicked();
 
@@ -36,4 +36,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void SetPlayerCharacter(APlayerCharacter* playerCharacter);
 };

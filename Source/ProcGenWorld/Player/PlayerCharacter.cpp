@@ -19,12 +19,6 @@ APlayerCharacter::APlayerCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
-	CameraSpringArm->SetupAttachment(RootComponent);
-
-	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
-	PlayerCamera->SetupAttachment(CameraSpringArm);
-
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
 	GroundCheckPoint->SetupAttachment(RootComponent);
 }
@@ -129,7 +123,7 @@ void APlayerCharacter::CheckIsOnGround()
 
 void APlayerCharacter::UpdatePlayerModel()
 {
-	if (FMath::Abs(_moveX) < FloatTolerance && FMath::Abs(_moveZ) < FloatTolerance) {
+	/*if (FMath::Abs(_moveX) < FloatTolerance && FMath::Abs(_moveZ) < FloatTolerance) {
 		return;
 	}
 
@@ -148,7 +142,11 @@ void APlayerCharacter::UpdatePlayerModel()
 		auto targetRotation = FRotator(0, mappedAngle, 0);
 
 		_playerModel->SetActorRotation(targetRotation);
-	}
+	}*/
+
+
+	float angleDegree = To360Angle(ModelRotationOffset + GetActorRotation().Yaw);
+	_playerModel->SetActorRotation(FRotator(0, angleDegree, 0));;
 }
 
 float APlayerCharacter::LerpAngleDeg(float fromDegrees, float toDegrees, float progress)
@@ -193,12 +191,6 @@ void APlayerCharacter::MoveRight()
 {
 	_currentInputLockDelay = InputLockTime;
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Move Right");
-}
-
-void APlayerCharacter::SetPlayerCamera(APlayerController* playerController)
-{
-	FViewTargetTransitionParams params;
-	playerController->SetViewTarget(this, params);
 }
 
 void APlayerCharacter::HandleMouseClicked(FHitResult hitResult, ATile* tile)

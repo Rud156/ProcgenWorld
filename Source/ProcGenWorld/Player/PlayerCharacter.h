@@ -18,12 +18,6 @@ class PROCGENWORLD_API APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
-		class USpringArmComponent* CameraSpringArm;
-
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
-		class UCameraComponent* PlayerCamera;
-
 	UPROPERTY(Category = Positions, VisibleDefaultsOnly)
 		class USceneComponent* GroundCheckPoint;
 
@@ -111,7 +105,6 @@ public:
 	void MoveLeft();
 	void MoveRight();
 
-	void SetPlayerCamera(APlayerController* playerController);
 	void HandleMouseClicked(FHitResult hitResult, ATile* tile);
 
 #pragma endregion

@@ -5,6 +5,8 @@
 #include "PlayerCharacter.h"
 #include "../Room/Tile.h"
 
+#include "Components/SceneComponent.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 
@@ -13,6 +15,9 @@ APlayerTopDownController::APlayerTopDownController()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	TopDownSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("TopDownSceneComponent"));
+	RootComponent = TopDownSceneComponent;
 }
 
 // Called when the game starts or when spawned
@@ -20,8 +25,8 @@ void APlayerTopDownController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FTimerHandle unusedHandle;
-	GetWorldTimerManager().SetTimer(unusedHandle, this, &APlayerTopDownController::DelayedSwitchCamera, 1, false);
+	auto playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+	SetPlayerCharacter(Cast<APlayerCharacter>(playerActor));
 }
 
 // Called every frame
@@ -44,23 +49,6 @@ void APlayerTopDownController::SetupPlayerInputComponent(UInputComponent* Player
 	PlayerInputComponent->BindAction("LeftClick", EInputEvent::IE_Pressed, this, &APlayerTopDownController::HandleMouseClicked);
 }
 
-void APlayerTopDownController::DelayedSwitchCamera()
-{
-	auto playerCharacterActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-	APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(playerCharacterActor);
-	if (playerCharacter != nullptr) {
-		_playerCharacter = playerCharacter;
-
-		APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		_playerCharacter->SetPlayerCamera(playerController);
-
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Player Character Found");
-	}
-	else {
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Player Character Not Found");
-	}
-}
-
 void APlayerTopDownController::HandleMouseClicked()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Mouse Clicked");
@@ -79,5 +67,10 @@ void APlayerTopDownController::HandleMouseClicked()
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, *hitActor->GetName());
 	}
+}
+
+void APlayerTopDownController::SetPlayerCharacter(APlayerCharacter* playerCharacter)
+{
+	_playerCharacter = playerCharacter;
 }
 

@@ -11,7 +11,7 @@ class PROCGENWORLD_API ATile : public AActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		USceneComponent* TileParent;
 
 public:

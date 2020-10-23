@@ -2,7 +2,9 @@
 
 
 #include "RoomGenerator.h"
+
 #include "Math/UnrealMathUtility.h"
+#include "Misc/OutputDeviceNull.h"
 
 // Sets default values
 ARoomGenerator::ARoomGenerator()
@@ -53,6 +55,18 @@ void ARoomGenerator::Tick(float DeltaTime)
 		if (_lerpAmount >= 1) {
 			this->SetActorLocation(_lerpTargetPosition);
 			_isLerpActive = false;
+
+			for (int i = 0; i < _walls.Num(); i++) {
+				FOutputDeviceNull ar;
+				FString command = FString::Printf(TEXT("SetWallImmobile"));
+				_walls[i]->CallFunctionByNameWithArguments(*command, ar, NULL, true);
+			}
+
+			for (int i = 0; i < _floorTiles.Num(); i++) {
+				FOutputDeviceNull ar;
+				FString command = FString::Printf(TEXT("SetTileImmobile"));
+				_floorTiles[i]->CallFunctionByNameWithArguments(*command, ar, NULL, true);
+			}
 		}
 	}
 }

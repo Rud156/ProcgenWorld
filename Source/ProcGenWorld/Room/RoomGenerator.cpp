@@ -2,6 +2,8 @@
 
 
 #include "RoomGenerator.h"
+#include "Tile.h"
+#include "../Enemy/EnemyControllerBase.h"
 
 #include "Math/UnrealMathUtility.h"
 #include "Misc/OutputDeviceNull.h"
@@ -24,11 +26,16 @@ void ARoomGenerator::BeginPlay()
 	_rightColumnDoorPosition = FVector::ZeroVector;
 
 	_room = TMap<int, TMap<int, FWindowsPlatformTypes::TCHAR>>();
+	_roomEnemies = TArray<AEnemyControllerBase*>();
+	_floorMatrix = TMap<int, TMap<int, ATile*>>();
 
 	_walls = TArray<AActor*>();
-	_floorTiles = TArray<AActor*>();
+	_floorTiles = TArray<ATile*>();
 
 	_isLerpActive = false;
+
+	_playerRow = -1;
+	_playerColumn = -1;
 }
 
 void ARoomGenerator::Destroyed()
@@ -227,16 +234,81 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 	FVector currentPosition = _startPosition;
 
 	for (int i = 0; i < _rowCount - 1; i++) {
+		if (!_floorMatrix.Contains(i)) {
+			_floorMatrix.Add(i, TMap<int, ATile*>());
+		}
+
 		for (int j = 0; j <= _columnCount; j++) {
 			AActor* floorInstance = GetWorld()->SpawnActor(FloorPrefab, &currentPosition, &FRotator::ZeroRotator);
 			floorInstance->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-			_floorTiles.Add(floorInstance);
+
+			ATile* tile = Cast<ATile>(floorInstance);
+			if (tile != nullptr) {
+				_floorTiles.Add(tile);
+				_floorMatrix[i].Add(j, tile);
+			}
 
 			currentPosition.X += WallWidth;
 		}
 
 		currentPosition.X = _startPosition.X;
 		currentPosition.Y += WallWidth;
+	}
+}
+
+ATile* ARoomGenerator::GetRandomTileInRoom(int& row, int& column)
+{
+	int randomRow = FMath::RandRange(0, _rowCount - 2);
+	int randomColumn = FMath::RandRange(0, _columnCount);
+
+	row = randomRow;
+	column = randomColumn;
+
+	ATile* randomTile = _floorMatrix[randomRow][randomColumn];
+	return randomTile;
+}
+
+void ARoomGenerator::ClearAllTilesStatus()
+{
+	for (int i = 0; i < _floorTiles.Num(); i++) {
+		_floorTiles[i]->ClearTileMoveableStatus();
+	}
+}
+
+void ARoomGenerator::MarkValidSpots(int currentRow, int currentColumn)
+{
+	ClearAllTilesStatus();
+
+	int leftColumn = currentColumn - 1;
+	int rightColumn = currentColumn + 1;
+	int topRow = currentRow - 1;
+	int bottomRow = currentRow + 1;
+
+	if (leftColumn < 0) {
+		leftColumn = 0;
+	}
+	if (rightColumn > _columnCount) {
+		rightColumn = _columnCount;
+	}
+	if (topRow < 0) {
+		topRow = 0;
+	}
+	if (bottomRow > _rowCount - 2) {
+		bottomRow = _rowCount - 2;
+	}
+
+
+	if (leftColumn != currentColumn) {
+		_floorMatrix[currentRow][leftColumn]->MarkTileMoveable();
+	}
+	if (rightColumn != currentColumn) {
+		_floorMatrix[currentRow][rightColumn]->MarkTileMoveable();
+	}
+	if (topRow != currentRow) {
+		_floorMatrix[topRow][currentColumn]->MarkTileMoveable();
+	}
+	if (bottomRow != currentRow) {
+		_floorMatrix[bottomRow][currentColumn]->MarkTileMoveable();
 	}
 }
 
@@ -294,7 +366,7 @@ int ARoomGenerator::GetColumnCount()
 	return _columnCount;
 }
 
-TArray<AActor*> ARoomGenerator::GetFloorTiles()
+TArray<ATile*> ARoomGenerator::GetFloorTiles()
 {
 	return _floorTiles;
 }

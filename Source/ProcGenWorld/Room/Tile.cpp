@@ -19,6 +19,7 @@ void ATile::BeginPlay()
 	Super::BeginPlay();
 
 	TileCenter = GetActorLocation();
+	_isMoveable = false;
 }
 
 // Called every frame
@@ -27,3 +28,19 @@ void ATile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+bool ATile::IsTileMarked()
+{
+	return _isMoveable;
+}
+
+void ATile::MarkTileMoveable()
+{
+	_isMoveable = true;
+	// TODO: Complete this function...
+}
+
+void ATile::ClearTileMoveableStatus()
+{
+	_isMoveable = false;
+	// TODO: Complete this function...
+}

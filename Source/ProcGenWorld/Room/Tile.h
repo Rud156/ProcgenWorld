@@ -11,8 +11,10 @@ class PROCGENWORLD_API ATile : public AActor
 {
 	GENERATED_BODY()
 
-		UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		USceneComponent* TileParent;
+
+	bool _isMoveable;
 
 public:
 #pragma region Properties
@@ -27,6 +29,10 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	bool IsTileMarked();
+	void MarkTileMoveable();
+	void ClearTileMoveableStatus();
 
 protected:
 	// Called when the game starts or when spawned

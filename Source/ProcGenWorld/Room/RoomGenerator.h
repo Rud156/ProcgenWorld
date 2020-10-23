@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "RoomGenerator.generated.h"
 
+class ATile;
+class AEnemyControllerBase;
+
 UCLASS()
 class PROCGENWORLD_API ARoomGenerator : public AActor
 {
@@ -15,6 +18,10 @@ private:
 	int _rowCount;
 	int _columnCount;
 	TMap<int, TMap<int, FWindowsPlatformTypes::TCHAR>> _room;
+	TMap<int, TMap<int, ATile*>> _floorMatrix;
+
+	int _playerRow;
+	int _playerColumn;
 
 	FVector _startPosition;
 
@@ -25,12 +32,15 @@ private:
 
 	FString _roomName;
 	TArray<AActor*> _walls;
-	TArray<AActor*> _floorTiles;
+	TArray<ATile*> _floorTiles;
 
 	FVector _lerpStartPositon;
 	FVector _lerpTargetPosition;
 	float _lerpAmount;
 	bool _isLerpActive;
+
+	TArray<AEnemyControllerBase*> _roomEnemies;
+	bool _isRoomCleared;
 
 	void RenderRoomFromString(FString roomString, FVector startPosition);
 	void GenerateRoomMatrix(FString roomString);
@@ -76,6 +86,10 @@ public:
 
 	void LoadRoomFromFile(FString roomName, FVector startPosition);
 
+	ATile* GetRandomTileInRoom(int& row, int& column);
+	void ClearAllTilesStatus();
+	void MarkValidSpots(int currentRow, int currentColumn);
+
 	FString GetRoomName();
 	FVector GetStartPosition();
 	void UpdateRoomPosition(FVector offset);
@@ -89,7 +103,7 @@ public:
 	int GetColumnCount();
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
-		TArray<AActor*> GetFloorTiles();
+		TArray<ATile*> GetFloorTiles();
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
 		TArray<AActor*> GetWalls();

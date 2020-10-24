@@ -15,7 +15,7 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
 	GENERATED_BODY()
 
-		UPROPERTY(Category = Actor, VisibleDefaultsOnly)
+	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
 		class USceneComponent* TopDownSceneComponent;
 
 	APlayerCharacter* _playerCharacter;
@@ -24,6 +24,8 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 
 	int _playerRoomRow;
 	int _playerRoomColumn;
+
+	bool _isPlayerTurn;
 
 	void HandleMouseClicked();
 
@@ -47,4 +49,7 @@ public:
 	void SetDefaultProperties(APlayerCharacter* playerCharacter, APlayerSpawn* playerSpawn);
 	void SetCurrentRoom(ARoomGenerator* roomGenerator);
 	void SetPlayerRowAndColumn(int row, int column);
+
+	void EnablePlayerTurn();
+	void DisablePlayerTurn();
 };

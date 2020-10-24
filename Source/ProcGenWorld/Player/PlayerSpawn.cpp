@@ -8,6 +8,7 @@
 #include "../Room/Tile.h"
 #include "../Room/DungeonGenerator.h"
 #include "../Room/RoomGenerator.h"
+#include "../Game/GameController.h"
 
 #include "GameFramework/DefaultPawn.h"
 #include "GameFramework/Controller.h"
@@ -40,12 +41,18 @@ void APlayerSpawn::BeginPlay()
 
 	auto dungeonActor = UGameplayStatics::GetActorOfClass(GetWorld(), ADungeonGenerator::StaticClass());
 	_dungeonGen = Cast<ADungeonGenerator>(dungeonActor);
-
 	if (_dungeonGen != nullptr) {
 		_dungeonGen->OnGenerationComplete.AddDynamic(this, &APlayerSpawn::RoomGenerationComplete);
 	}
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "Unable to find Dungeon Generator!!!");
+	}
+
+	auto gameControllerActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass());
+	_gameController = Cast<AGameController>(gameControllerActor);
+	if (_gameController == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Unable To Find GameController!!!");
 	}
 }
 
@@ -96,7 +103,7 @@ void APlayerSpawn::SpawnPlayer()
 	_playerModel = Cast<APlayerModel>(playerModelActor);
 	_playerCharacter = Cast<APlayerCharacter>(playerCharacterActor);
 	_playerTopDownController = Cast<APlayerTopDownController>(playerTopDownControllerActor);
-
+	
 	APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	controller->UnPossess();
 	controller->Possess(_playerTopDownController);
@@ -111,7 +118,8 @@ void APlayerSpawn::SpawnPlayer()
 	_playerTopDownController->SetDefaultProperties(_playerCharacter, this);
 	_playerTopDownController->SetCurrentRoom(spawnRoom);
 	_playerTopDownController->SetPlayerRowAndColumn(row, column);
+	_playerTopDownController->DisablePlayerTurn();
+	_gameController->SetPlayerTopDownController(_playerTopDownController);
 
 	OnPlayerSpawnComplete.Broadcast(_playerCharacter);
-
 }

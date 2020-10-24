@@ -50,6 +50,12 @@ void APlayerTopDownController::SetupPlayerInputComponent(UInputComponent* Player
 
 void APlayerTopDownController::HandleMouseClicked()
 {
+	if (!_isPlayerTurn)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Not Player's Turn");
+		return;
+	}
+
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Mouse Clicked");
 	APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
@@ -99,4 +105,14 @@ void APlayerTopDownController::SetPlayerRowAndColumn(int row, int column)
 	_playerRoomColumn = column;
 
 	_currentRoom->MarkValidSpots(_playerRoomRow, _playerRoomColumn);
+}
+
+void APlayerTopDownController::EnablePlayerTurn()
+{
+	_isPlayerTurn = true;
+}
+
+void APlayerTopDownController::DisablePlayerTurn()
+{
+	_isPlayerTurn = false;
 }

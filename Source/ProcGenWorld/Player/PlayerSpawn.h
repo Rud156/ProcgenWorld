@@ -12,6 +12,7 @@ class APlayerTopDownController;
 class APlayerModel;
 class ADefaultPawn;
 class ATriggerBox;
+class AGameController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPlayerSpawnComplete, APlayerCharacter*, PlayerCharacter);
 
@@ -21,6 +22,7 @@ class PROCGENWORLD_API APlayerSpawn : public AActor
 	GENERATED_BODY()
 
 	ADungeonGenerator* _dungeonGen;
+	AGameController* _gameController;
 
 	APlayerModel* _playerModel;
 	APlayerCharacter* _playerCharacter;

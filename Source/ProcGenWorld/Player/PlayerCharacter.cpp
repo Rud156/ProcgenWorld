@@ -193,10 +193,10 @@ void APlayerCharacter::MoveRight()
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Move Right");
 }
 
-void APlayerCharacter::HandleMouseClicked(FHitResult hitResult, ATile* tile)
+bool APlayerCharacter::HandleMouseClicked(FHitResult hitResult, ATile* tile)
 {
 	if (_currentInputLockDelay > 0) {
-		return;
+		return false;
 	}
 
 	_currentInputLockDelay = InputLockTime;
@@ -208,9 +208,12 @@ void APlayerCharacter::HandleMouseClicked(FHitResult hitResult, ATile* tile)
 	if (aiController != nullptr) {
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "AI Controller Exists");
 		OnPlayerMoved.Broadcast(targetLocation);
+
+		return true;
 	}
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "AI Controller Does Not Exists");
+		return false;
 	}
 }
 

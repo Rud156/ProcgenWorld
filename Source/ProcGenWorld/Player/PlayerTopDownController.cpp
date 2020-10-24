@@ -63,10 +63,14 @@ void APlayerTopDownController::HandleMouseClicked()
 		bool isTileMarked = tile->IsTileMarked();
 
 		if (isTileMarked) {
-			_playerRoomRow = tile->GetRow();
-			_playerRoomColumn = tile->GetColumn();
-			_playerCharacter->HandleMouseClicked(hitResult, tile);
-			_currentRoom->MarkValidSpots(_playerRoomRow, _playerRoomColumn);
+			bool movementSuccess = _playerCharacter->HandleMouseClicked(hitResult, tile);
+
+			if (movementSuccess)
+			{
+				_playerRoomRow = tile->GetRow();
+				_playerRoomColumn = tile->GetColumn();
+				_currentRoom->MarkValidSpots(_playerRoomRow, _playerRoomColumn);
+			}
 		}
 		else
 		{

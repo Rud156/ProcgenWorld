@@ -52,4 +52,7 @@ public:
 
 	void EnablePlayerTurn();
 	void DisablePlayerTurn();
+
+	int GetPlayerRow();
+	int GetPlayerColumn();
 };

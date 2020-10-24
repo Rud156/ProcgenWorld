@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../Data/EnumData.h"
 #include "Tile.generated.h"
 
 class ARoomGenerator;
@@ -13,7 +14,7 @@ class PROCGENWORLD_API ATile : public AActor
 {
 	GENERATED_BODY()
 
-		ARoomGenerator* _roomParent;
+	ARoomGenerator* _roomParent;
 	bool _isMoveable;
 
 	int _row;
@@ -27,6 +28,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 		FVector TileCenter;
+
+	UPROPERTY(Category = TileData, EditAnywhere)
+		TileType TileType;
 
 	UPROPERTY(Category = Positions, EditAnywhere)
 		FVector TileCenterOffset;

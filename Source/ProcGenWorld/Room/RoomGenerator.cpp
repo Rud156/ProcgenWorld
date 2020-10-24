@@ -52,7 +52,7 @@ void ARoomGenerator::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (_isLerpActive) {
-		auto targetLocation = FMath::Lerp(_lerpStartPositon, _lerpTargetPosition, _lerpAmount);
+		auto targetLocation = FMath::Lerp(_lerpStartPosition, _lerpTargetPosition, _lerpAmount);
 		this->SetActorLocation(targetLocation);
 
 		_lerpAmount += GetWorld()->GetDeltaSeconds() * LerpSpeed;
@@ -256,6 +256,26 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 	}
 }
 
+void ARoomGenerator::HandleUnitDied(AEnemyControllerBase* enemy)
+{
+	for (int i = 0; i < _roomEnemies.Num(); i++)
+	{
+		if (_roomEnemies[i] == enemy)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Enemy Killed");
+			_roomEnemies.RemoveAt(i);
+			break;
+		}
+	}
+
+	if (_roomEnemies.Num() <= 0)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Room Cleared");
+		_isRoomCleared = true;
+	}
+}
+
+
 ATile* ARoomGenerator::GetRandomTileInRoom(int& row, int& column)
 {
 	int randomRow = FMath::RandRange(0, _rowCount - 2);
@@ -340,7 +360,7 @@ FVector ARoomGenerator::GetStartPosition()
 
 void ARoomGenerator::UpdateRoomPosition(FVector offset)
 {
-	_lerpStartPositon = this->GetActorLocation();
+	_lerpStartPosition = this->GetActorLocation();
 	_lerpTargetPosition = _startPosition + offset;
 	_lerpAmount = 0;
 	_isLerpActive = true;

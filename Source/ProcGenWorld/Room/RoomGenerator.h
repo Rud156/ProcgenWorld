@@ -32,12 +32,13 @@ private:
 	TArray<AActor*> _walls;
 	TArray<ATile*> _floorTiles;
 
-	FVector _lerpStartPositon;
+	FVector _lerpStartPosition;
 	FVector _lerpTargetPosition;
 	float _lerpAmount;
 	bool _isLerpActive;
 
 	TArray<AEnemyControllerBase*> _roomEnemies;
+	bool _playerEnteredRoom;
 	bool _isRoomCleared;
 
 	void RenderRoomFromString(FString roomString, FVector startPosition);
@@ -86,6 +87,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void LoadRoomFromFile(FString roomName, FVector startPosition);
+
+	void HandleUnitDied(AEnemyControllerBase* enemy);
 
 	ATile* GetRandomTileInRoom(int& row, int& column);
 	void ClearAllTilesStatus();

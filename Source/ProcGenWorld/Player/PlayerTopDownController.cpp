@@ -116,3 +116,13 @@ void APlayerTopDownController::DisablePlayerTurn()
 {
 	_isPlayerTurn = false;
 }
+
+int APlayerTopDownController::GetPlayerRow()
+{
+	return _playerRoomRow;
+}
+
+int APlayerTopDownController::GetPlayerColumn()
+{
+	return _playerRoomColumn;
+}

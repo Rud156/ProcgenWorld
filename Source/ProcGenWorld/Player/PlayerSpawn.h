@@ -31,7 +31,7 @@ class PROCGENWORLD_API APlayerSpawn : public AActor
 
 
 	UFUNCTION()
-	void RoomGeneratonComplete();
+	void RoomGenerationComplete();
 
 	UFUNCTION()
 	void RoomGenerationStarted();
@@ -52,9 +52,6 @@ public:
 
 	UPROPERTY(Category = Spawn, EditAnywhere)
 		TSubclassOf<class ATriggerBox> TriggerBoxPrefab;
-
-	UPROPERTY(Category = Spawn, EditAnywhere)
-		FVector SpawnOffset;
 
 	UPROPERTY(Category = Spawn, EditAnywhere)
 		float PlayerSpawnDelay;

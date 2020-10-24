@@ -3,7 +3,9 @@
 
 #include "PlayerTopDownController.h"
 #include "PlayerCharacter.h"
+#include "PlayerSpawn.h"
 #include "../Room/Tile.h"
+#include "../Room/RoomGenerator.h"
 
 #include "Components/SceneComponent.h"
 
@@ -24,9 +26,6 @@ APlayerTopDownController::APlayerTopDownController()
 void APlayerTopDownController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	auto playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-	SetPlayerCharacter(Cast<APlayerCharacter>(playerActor));
 }
 
 // Called every frame
@@ -52,25 +51,48 @@ void APlayerTopDownController::SetupPlayerInputComponent(UInputComponent* Player
 void APlayerTopDownController::HandleMouseClicked()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Mouse Clicked");
+	APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	FHitResult hitResult;
-
-	APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	playerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, hitResult);
 
 	auto hitActor = hitResult.GetActor();
 	ATile* tile = Cast<ATile>(hitActor);
 
 	if (tile != nullptr) {
-		_playerCharacter->HandleMouseClicked(hitResult, tile);
+		bool isTileMarked = tile->IsTileMarked();
+
+		if (isTileMarked) {
+			_playerRoomRow = tile->GetRow();
+			_playerRoomColumn = tile->GetColumn();
+			_playerCharacter->HandleMouseClicked(hitResult, tile);
+			_currentRoom->MarkValidSpots(_playerRoomRow, _playerRoomColumn);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile Clicked!!!");
+		}
 	}
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, *hitActor->GetName());
 	}
 }
 
-void APlayerTopDownController::SetPlayerCharacter(APlayerCharacter* playerCharacter)
+void APlayerTopDownController::SetDefaultProperties(APlayerCharacter* playerCharacter, APlayerSpawn* playerSpawn)
 {
 	_playerCharacter = playerCharacter;
+	_playerSpawn = playerSpawn;
 }
 
+void APlayerTopDownController::SetCurrentRoom(ARoomGenerator* roomGenerator)
+{
+	_currentRoom = roomGenerator;
+}
+
+void APlayerTopDownController::SetPlayerRowAndColumn(int row, int column)
+{
+	_playerRoomRow = row;
+	_playerRoomColumn = column;
+
+	_currentRoom->MarkValidSpots(_playerRoomRow, _playerRoomColumn);
+}

@@ -198,10 +198,6 @@ void APlayerCharacter::HandleMouseClicked(FHitResult hitResult, ATile* tile)
 	if (_currentInputLockDelay > 0) {
 		return;
 	}
-	if (!tile->IsTileMarked()) {
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Tile is UnMarked To Move");
-		return;
-	}
 
 	_currentInputLockDelay = InputLockTime;
 

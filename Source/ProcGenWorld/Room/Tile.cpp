@@ -2,6 +2,7 @@
 
 
 #include "Tile.h"
+#include "RoomGenerator.h"
 
 // Sets default values
 ATile::ATile()
@@ -11,6 +12,8 @@ ATile::ATile()
 
 	TileParent = CreateDefaultSubobject<USceneComponent>(TEXT("TileParent"));
 	RootComponent = TileParent;
+
+	TileCenterOffset = FVector(100, 100, 0);
 }
 
 // Called when the game starts or when spawned
@@ -18,7 +21,7 @@ void ATile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TileCenter = GetActorLocation();
+	TileCenter = GetActorLocation() + TileCenterOffset;
 	_isMoveable = false;
 }
 
@@ -27,6 +30,18 @@ void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+void ATile::SetTileParent(ARoomGenerator* roomGenerator)
+{
+	_roomParent = roomGenerator;
+}
+
+void ATile::SetPositionInRoom(int row, int column)
+{
+	_row = row;
+	_column = column;
+}
+
 
 bool ATile::IsTileMarked()
 {
@@ -47,4 +62,14 @@ void ATile::ClearTileMoveableStatus(UMaterialInstance* defaultMaterial)
 	SetTileUnMarkedMaterial(defaultMaterial);
 
 	// TODO: Complete this function...
+}
+
+int ATile::GetRow()
+{
+	return _row;
+}
+
+int ATile::GetColumn()
+{
+	return  _column;
 }

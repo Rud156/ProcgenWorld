@@ -33,9 +33,6 @@ void ARoomGenerator::BeginPlay()
 	_floorTiles = TArray<ATile*>();
 
 	_isLerpActive = false;
-
-	_playerRow = -1;
-	_playerColumn = -1;
 }
 
 void ARoomGenerator::Destroyed()
@@ -244,6 +241,9 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 
 			ATile* tile = Cast<ATile>(floorInstance);
 			if (tile != nullptr) {
+				tile->SetTileParent(this);
+				tile->SetPositionInRoom(i, j);
+
 				_floorTiles.Add(tile);
 				_floorMatrix[i].Add(j, tile);
 			}
@@ -301,14 +301,30 @@ void ARoomGenerator::MarkValidSpots(int currentRow, int currentColumn)
 	if (leftColumn != currentColumn) {
 		_floorMatrix[currentRow][leftColumn]->MarkTileMoveable(TileMarkerMaterial);
 	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Left Is Same");
+	}
 	if (rightColumn != currentColumn) {
 		_floorMatrix[currentRow][rightColumn]->MarkTileMoveable(TileMarkerMaterial);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Right Is Same");
 	}
 	if (topRow != currentRow) {
 		_floorMatrix[topRow][currentColumn]->MarkTileMoveable(TileMarkerMaterial);
 	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Top Is Same");
+	}
 	if (bottomRow != currentRow) {
 		_floorMatrix[bottomRow][currentColumn]->MarkTileMoveable(TileMarkerMaterial);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Bottom Is Same");
 	}
 }
 
@@ -364,6 +380,11 @@ int ARoomGenerator::GetRowCount()
 int ARoomGenerator::GetColumnCount()
 {
 	return _columnCount;
+}
+
+bool ARoomGenerator::IsRoomCleared()
+{
+	return _isRoomCleared;
 }
 
 TArray<ATile*> ARoomGenerator::GetFloorTiles()

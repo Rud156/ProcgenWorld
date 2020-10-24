@@ -7,16 +7,23 @@
 #include "PlayerTopDownController.generated.h"
 
 class APlayerCharacter;
+class ARoomGenerator;
+class APlayerSpawn;
 
 UCLASS()
 class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
+		UPROPERTY(Category = Actor, VisibleDefaultsOnly)
 		class USceneComponent* TopDownSceneComponent;
 
 	APlayerCharacter* _playerCharacter;
+	APlayerSpawn* _playerSpawn;
+	ARoomGenerator* _currentRoom;
+
+	int _playerRoomRow;
+	int _playerRoomColumn;
 
 	void HandleMouseClicked();
 
@@ -37,5 +44,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void SetPlayerCharacter(APlayerCharacter* playerCharacter);
+	void SetDefaultProperties(APlayerCharacter* playerCharacter, APlayerSpawn* playerSpawn);
+	void SetCurrentRoom(ARoomGenerator* roomGenerator);
+	void SetPlayerRowAndColumn(int row, int column);
 };

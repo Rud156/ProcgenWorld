@@ -20,9 +20,6 @@ private:
 	TMap<int, TMap<int, FWindowsPlatformTypes::TCHAR>> _room;
 	TMap<int, TMap<int, ATile*>> _floorMatrix;
 
-	int _playerRow;
-	int _playerColumn;
-
 	UMaterialInstance* _roomDefaultMaterial;
 	FVector _startPosition;
 
@@ -105,6 +102,7 @@ public:
 
 	int GetRowCount();
 	int GetColumnCount();
+	bool IsRoomCleared();
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
 		TArray<ATile*> GetFloorTiles();

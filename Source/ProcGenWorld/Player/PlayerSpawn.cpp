@@ -5,6 +5,7 @@
 #include "PlayerModel.h"
 #include "PlayerCharacter.h"
 #include "PlayerTopDownController.h"
+#include "../Room/Tile.h"
 #include "../Room/DungeonGenerator.h"
 #include "../Room/RoomGenerator.h"
 
@@ -41,7 +42,7 @@ void APlayerSpawn::BeginPlay()
 	_dungeonGen = Cast<ADungeonGenerator>(dungeonActor);
 
 	if (_dungeonGen != nullptr) {
-		_dungeonGen->OnGenerationComplete.AddDynamic(this, &APlayerSpawn::RoomGeneratonComplete);
+		_dungeonGen->OnGenerationComplete.AddDynamic(this, &APlayerSpawn::RoomGenerationComplete);
 	}
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, "Unable to find Dungeon Generator!!!");
@@ -54,7 +55,7 @@ void APlayerSpawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void APlayerSpawn::RoomGeneratonComplete()
+void APlayerSpawn::RoomGenerationComplete()
 {
 	FTimerHandle unusedHandle;
 	GetWorldTimerManager().SetTimer(unusedHandle, this, &APlayerSpawn::SpawnPlayer, PlayerSpawnDelay, false);
@@ -83,8 +84,10 @@ void APlayerSpawn::SpawnPlayer()
 	int spawnColumn = _dungeonGen->GetSpawnColumn();
 	ARoomGenerator* spawnRoom = _dungeonGen->GetRoom(spawnRow, spawnColumn);
 
-	FVector startPosition = spawnRoom->GetStartPosition();
-	startPosition += SpawnOffset;
+	int row;
+	int column;
+	ATile* tile = spawnRoom->GetRandomTileInRoom(row, column);
+	FVector startPosition = tile->TileCenter;
 
 	AActor* playerModelActor = GetWorld()->SpawnActor(PlayerModelPrefab, &startPosition, &FRotator::ZeroRotator);
 	AActor* playerCharacterActor = GetWorld()->SpawnActor(PlayerCharacterPrefab, &startPosition, &FRotator::ZeroRotator);
@@ -104,6 +107,10 @@ void APlayerSpawn::SpawnPlayer()
 
 	_victoryTrigger->SetActorLocation(exitRoom->GetStartPosition() + TriggerBoxSpawnOffset);
 	_victoryTrigger->SetActorScale3D(TriggerBoxSpawnScale);
+
+	_playerTopDownController->SetDefaultProperties(_playerCharacter, this);
+	_playerTopDownController->SetCurrentRoom(spawnRoom);
+	_playerTopDownController->SetPlayerRowAndColumn(row, column);
 
 	OnPlayerSpawnComplete.Broadcast(_playerCharacter);
 

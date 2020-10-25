@@ -67,7 +67,10 @@ public:
 		float MeleeDamageAmount;
 
 	UPROPERTY(Category = PlayerStats, EditAnywhere)
-		float SpearDamageAmount;
+		float EnemyPushManaCost;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float EnemyPushDamage;
 
 	UPROPERTY(Category = Spawning, BlueprintAssignable)
 		FPlayerDied OnPlayerDied;

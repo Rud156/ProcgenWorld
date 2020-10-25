@@ -65,6 +65,16 @@ int AEnemyControllerBase::GetColumn()
 	return _currentColumn;
 }
 
+int AEnemyControllerBase::GetCurrentHealth()
+{
+	return _health;
+}
+
+int AEnemyControllerBase::GetMaxHealth()
+{
+	return  MaxHealth;
+}
+
 void AEnemyControllerBase::TakeDamage(int damageAmount)
 {
 	_health -= damageAmount;

@@ -26,6 +26,10 @@ APlayerTopDownController::APlayerTopDownController()
 	MaxHealth = 3;
 	MaxMana = 5;
 
+	MeleeDamageAmount = 1;
+
+	EnemyPushDamage = 1;
+	EnemyPushManaCost = 3;
 }
 
 // Called when the game starts or when spawned
@@ -127,23 +131,23 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 	}
 	else if (isTileMarked && tileData == WorldElementType::Enemy)
 	{
-		bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
 		if (_playerHasSpear)
 		{
 			auto enemy = _currentRoom->GetEnemyAtPosition(row, column);
 			if (enemy != nullptr)
 			{
-				enemy->TakeDamage(SpearDamageAmount);
+				enemy->TakeDamage(enemy->GetMaxHealth());
 			}
-		}
 
-		if (movementSuccess)
-		{
-			_playerRoomRow = tile->GetRow();
-			_playerRoomColumn = tile->GetColumn();
+			bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
+			if (movementSuccess)
+			{
+				_playerRoomRow = tile->GetRow();
+				_playerRoomColumn = tile->GetColumn();
 
-			_currentRoom->ClearAllTilesStatus();
-			_gameController->EndPlayerTurn();
+				_currentRoom->ClearAllTilesStatus();
+				_gameController->EndPlayerTurn();
+			}
 		}
 	}
 	else
@@ -171,6 +175,315 @@ void APlayerTopDownController::ExecutePushAction(ATile* tile)
 {
 	int row = tile->GetRow();
 	int column = tile->GetColumn();
+
+	if (!tile->IsTileMarked())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile Clicked!!!");
+		return;
+	}
+
+	auto worldState = _currentRoom->GetWorldState();
+
+	int leftSide = _playerRoomColumn - 1;
+	int rightSide = _playerRoomColumn + 1;
+	int topSide = _playerRoomRow - 1;
+	int bottomSide = _playerRoomRow + 1;
+
+	// Left Side
+	if (row == _playerRoomRow && column == leftSide)
+	{
+		TArray<AEnemyControllerBase*> enemyInRow = TArray<AEnemyControllerBase*>();
+		TileType lastTileType = TileType::WallTile;
+
+		for (int i = leftSide; i >= 0; i--)
+		{
+			auto tileData = worldState[row][i];
+			if (tileData == WorldElementType::Enemy)
+			{
+				enemyInRow.Add(_currentRoom->GetEnemyAtPosition(row, i));
+			}
+			else if (tileData == WorldElementType::Floor)
+			{
+				lastTileType = TileType::FloorTile;
+				break;
+			}
+			else if (tileData == WorldElementType::LavaTile)
+			{
+				lastTileType = TileType::LavaTile;
+				break;
+			}
+		}
+
+		switch (lastTileType)
+		{
+		case TileType::WallTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				enemyInRow[i]->TakeDamage(EnemyPushDamage);
+			}
+		}
+		break;
+
+		case TileType::FloorTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				int currentRow = enemyInRow[i]->GetRow();
+				int currentColumn = enemyInRow[i]->GetColumn();
+
+				enemyInRow[i]->Move(currentRow, currentColumn - 1);
+			}
+		}
+		break;
+
+		case TileType::LavaTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				if (i == enemyInRow.Num() - 1)
+				{
+					enemyInRow[i]->TakeDamage(enemyInRow[i]->GetMaxHealth());
+				}
+				else
+				{
+					int currentRow = enemyInRow[i]->GetRow();
+					int currentColumn = enemyInRow[i]->GetColumn();
+
+					enemyInRow[i]->Move(currentRow, currentColumn - 1);
+				}
+			}
+		}
+		break;
+
+		default:
+			// Do Nothing Here...
+			break;
+		}
+	}
+	// Right Side
+	else if (row == _playerRoomRow && column == rightSide)
+	{
+		TArray<AEnemyControllerBase*> enemyInRow = TArray<AEnemyControllerBase*>();
+		TileType lastTileType = TileType::WallTile;
+
+		int floorColumns = _currentRoom->GetColumnCount();
+
+		for (int i = rightSide; i <= floorColumns; i++)
+		{
+			auto tileData = worldState[row][i];
+			if (tileData == WorldElementType::Enemy)
+			{
+				enemyInRow.Add(_currentRoom->GetEnemyAtPosition(row, i));
+			}
+			else if (tileData == WorldElementType::Floor)
+			{
+				lastTileType = TileType::FloorTile;
+				break;
+			}
+			else if (tileData == WorldElementType::LavaTile)
+			{
+				lastTileType = TileType::LavaTile;
+				break;
+			}
+		}
+
+		switch (lastTileType)
+		{
+		case TileType::WallTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				enemyInRow[i]->TakeDamage(EnemyPushDamage);
+			}
+		}
+		break;
+
+		case TileType::FloorTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				int currentRow = enemyInRow[i]->GetRow();
+				int currentColumn = enemyInRow[i]->GetColumn();
+
+				enemyInRow[i]->Move(currentRow, currentColumn + 1);
+			}
+		}
+		break;
+
+		case TileType::LavaTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				if (i == enemyInRow.Num() - 1)
+				{
+					enemyInRow[i]->TakeDamage(enemyInRow[i]->GetMaxHealth());
+				}
+				else
+				{
+					int currentRow = enemyInRow[i]->GetRow();
+					int currentColumn = enemyInRow[i]->GetColumn();
+
+					enemyInRow[i]->Move(currentRow, currentColumn + 1);
+				}
+			}
+		}
+		break;
+
+		default:
+			// Do Nothing Here...
+			break;
+		}
+	}
+	// Top Side
+	else if (row == topSide && column == _playerRoomColumn)
+	{
+		TArray<AEnemyControllerBase*> enemyInRow = TArray<AEnemyControllerBase*>();
+		TileType lastTileType = TileType::WallTile;
+
+		for (int i = topSide; i >= 0; i--)
+		{
+			auto tileData = worldState[i][column];
+			if (tileData == WorldElementType::Enemy)
+			{
+				enemyInRow.Add(_currentRoom->GetEnemyAtPosition(i, column));
+			}
+			else if (tileData == WorldElementType::Floor)
+			{
+				lastTileType = TileType::FloorTile;
+				break;
+			}
+			else if (tileData == WorldElementType::LavaTile)
+			{
+				lastTileType = TileType::LavaTile;
+				break;
+			}
+		}
+
+		switch (lastTileType)
+		{
+		case TileType::WallTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				enemyInRow[i]->TakeDamage(EnemyPushDamage);
+			}
+		}
+		break;
+
+		case TileType::FloorTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				int currentRow = enemyInRow[i]->GetRow();
+				int currentColumn = enemyInRow[i]->GetColumn();
+
+				enemyInRow[i]->Move(currentRow - 1, currentColumn);
+			}
+		}
+		break;
+
+		case TileType::LavaTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				if (i == enemyInRow.Num() - 1)
+				{
+					enemyInRow[i]->TakeDamage(enemyInRow[i]->GetMaxHealth());
+				}
+				else
+				{
+					int currentRow = enemyInRow[i]->GetRow();
+					int currentColumn = enemyInRow[i]->GetColumn();
+
+					enemyInRow[i]->Move(currentRow - 1, currentColumn);
+				}
+			}
+		}
+		break;
+
+		default:
+			// Do Nothing Here...
+			break;
+		}
+	}
+	// Bottom Side
+	else if (row == bottomSide && column == _playerRoomColumn)
+	{
+		TArray<AEnemyControllerBase*> enemyInRow = TArray<AEnemyControllerBase*>();
+		TileType lastTileType = TileType::WallTile;
+
+		int floorRows = _currentRoom->GetRowCount() - 2;
+
+		for (int i = bottomSide; i <= floorRows; i++)
+		{
+			auto tileData = worldState[i][column];
+			if (tileData == WorldElementType::Enemy)
+			{
+				enemyInRow.Add(_currentRoom->GetEnemyAtPosition(i, column));
+			}
+			else if (tileData == WorldElementType::Floor)
+			{
+				lastTileType = TileType::FloorTile;
+				break;
+			}
+			else if (tileData == WorldElementType::LavaTile)
+			{
+				lastTileType = TileType::LavaTile;
+				break;
+			}
+		}
+
+		switch (lastTileType)
+		{
+		case TileType::WallTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				enemyInRow[i]->TakeDamage(EnemyPushDamage);
+			}
+		}
+		break;
+
+		case TileType::FloorTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				int currentRow = enemyInRow[i]->GetRow();
+				int currentColumn = enemyInRow[i]->GetColumn();
+
+				enemyInRow[i]->Move(currentRow + 1, currentColumn);
+			}
+		}
+		break;
+
+		case TileType::LavaTile:
+		{
+			for (int i = 0; i < enemyInRow.Num(); i++)
+			{
+				if (i == enemyInRow.Num() - 1)
+				{
+					enemyInRow[i]->TakeDamage(enemyInRow[i]->GetMaxHealth());
+				}
+				else
+				{
+					int currentRow = enemyInRow[i]->GetRow();
+					int currentColumn = enemyInRow[i]->GetColumn();
+
+					enemyInRow[i]->Move(currentRow + 1, currentColumn);
+				}
+			}
+		}
+		break;
+
+		default:
+			// Do Nothing Here...
+			break;
+		}
+	}
+
+	_currentRoom->ClearAllTilesStatus();
+	_gameController->EndPlayerTurn();
 }
 
 void APlayerTopDownController::ExecuteSpearThrowAction(ATile* tile)

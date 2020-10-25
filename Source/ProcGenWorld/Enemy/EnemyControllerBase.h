@@ -30,10 +30,13 @@ public:
 	int GetRow();
 	int GetColumn();
 
+	int GetCurrentHealth();
+	int GetMaxHealth();
 	void TakeDamage(int damageAmount);
 	void HandleUnitDied();
 
 	virtual void Execute();
+	void Move(int row, int column);
 
 protected:
 #pragma region Properties
@@ -49,6 +52,4 @@ protected:
 #pragma endregion
 
 	virtual void BeginPlay() override;
-
-	void Move(int row, int column);
 };

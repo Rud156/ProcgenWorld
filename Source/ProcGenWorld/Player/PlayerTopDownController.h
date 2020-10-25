@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "ProcGenWorld/Data/EnumData.h"
 #include "PlayerTopDownController.generated.h"
 
 class APlayerCharacter;
 class ARoomGenerator;
 class APlayerSpawn;
 class AGameController;
+class ATile;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDied);
 
@@ -18,12 +20,15 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
+		UPROPERTY(Category = Actor, VisibleDefaultsOnly)
 		class USceneComponent* TopDownSceneComponent;
 
 	AGameController* _gameController;
 	APlayerCharacter* _playerCharacter;
 	ARoomGenerator* _currentRoom;
+
+	bool _playerHasSpear;
+	ActionType _lastPlayerAction;
 
 	int _maxHP;
 	int _currentHP;
@@ -36,6 +41,11 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	bool _isPlayerTurn;
 
 	void HandleMouseClicked();
+	void ExecuteMoveToTileAction(FHitResult hitResult, ATile* tile);
+	void ExecuteAttackTileAction(ATile* tile);
+	void ExecutePushAction(ATile* tile);
+	void ExecuteSpearThrowAction(ATile* tile);
+	void ExecuteJumpAction(ATile* tile);
 
 protected:
 	virtual void BeginPlay() override;
@@ -52,6 +62,12 @@ public:
 
 	UPROPERTY(Category = PlayerStats, EditAnywhere)
 		float MaxMana;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float MeleeDamageAmount;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float SpearDamageAmount;
 
 	UPROPERTY(Category = Spawning, BlueprintAssignable)
 		FPlayerDied OnPlayerDied;

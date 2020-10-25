@@ -4,6 +4,7 @@
 #include "PlayerTopDownController.h"
 #include "PlayerCharacter.h"
 #include "PlayerSpawn.h"
+#include "../Enemy/EnemyControllerBase.h"
 #include "../Room/Tile.h"
 #include "../Room/RoomGenerator.h"
 #include "../Game/GameController.h"
@@ -76,23 +77,24 @@ void APlayerTopDownController::HandleMouseClicked()
 	ATile* tile = Cast<ATile>(hitActor);
 
 	if (tile != nullptr) {
-		bool isTileMarked = tile->IsTileMarked();
-
-		if (isTileMarked) {
-			bool movementSuccess = _playerCharacter->HandleMouseClicked(hitResult, tile);
-
-			if (movementSuccess)
-			{
-				_playerRoomRow = tile->GetRow();
-				_playerRoomColumn = tile->GetColumn();
-
-				_currentRoom->ClearAllTilesStatus();
-				_gameController->EndPlayerTurn();
-			}
-		}
-		else
+		switch (_lastPlayerAction)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile Clicked!!!");
+		case ActionType::Move:
+			ExecuteMoveToTileAction(hitResult, tile);
+			break;
+
+		case ActionType::Jump:
+			break;
+
+		case ActionType::Attack:
+			ExecuteAttackTileAction(tile);
+			break;
+
+		case ActionType::SpearThrow:
+			break;
+
+		case ActionType::Push:
+			break;
 		}
 	}
 	else {
@@ -101,6 +103,86 @@ void APlayerTopDownController::HandleMouseClicked()
 		}
 	}
 }
+
+void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATile* tile)
+{
+	bool isTileMarked = tile->IsTileMarked();
+	auto worldStatus = _currentRoom->GetWorldState();
+
+	int row = tile->GetRow();
+	int column = tile->GetColumn();
+	auto tileData = worldStatus[row][column];
+
+	if (isTileMarked && tileData == WorldElementType::Floor) {
+		bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
+
+		if (movementSuccess)
+		{
+			_playerRoomRow = tile->GetRow();
+			_playerRoomColumn = tile->GetColumn();
+
+			_currentRoom->ClearAllTilesStatus();
+			_gameController->EndPlayerTurn();
+		}
+	}
+	else if (isTileMarked && tileData == WorldElementType::Enemy)
+	{
+		bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
+		if (_playerHasSpear)
+		{
+			auto enemy = _currentRoom->GetEnemyAtPosition(row, column);
+			if (enemy != nullptr)
+			{
+				enemy->TakeDamage(SpearDamageAmount);
+			}
+		}
+
+		if (movementSuccess)
+		{
+			_playerRoomRow = tile->GetRow();
+			_playerRoomColumn = tile->GetColumn();
+
+			_currentRoom->ClearAllTilesStatus();
+			_gameController->EndPlayerTurn();
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile Clicked!!!");
+	}
+}
+
+void APlayerTopDownController::ExecuteAttackTileAction(ATile* tile)
+{
+	int row = tile->GetRow();
+	int column = tile->GetColumn();
+	auto enemy = _currentRoom->GetEnemyAtPosition(row, column);
+
+	if (enemy != nullptr)
+	{
+		enemy->TakeDamage(MeleeDamageAmount);
+
+		_currentRoom->ClearAllTilesStatus();
+		_gameController->EndPlayerTurn();
+	}
+}
+
+void APlayerTopDownController::ExecutePushAction(ATile* tile)
+{
+	int row = tile->GetRow();
+	int column = tile->GetColumn();
+}
+
+void APlayerTopDownController::ExecuteSpearThrowAction(ATile* tile)
+{
+	// TODO: Implement this function...
+}
+
+void APlayerTopDownController::ExecuteJumpAction(ATile* tile)
+{
+	// TODO: Implement this function...
+}
+
 
 void APlayerTopDownController::SetDefaultProperties(APlayerCharacter* playerCharacter, AGameController* gameController)
 {
@@ -211,25 +293,86 @@ void APlayerTopDownController::UseMana(int manaAmount)
 
 void APlayerTopDownController::HandlePlayerMoveAction()
 {
-	_currentRoom->MarkValidSpots(_playerRoomRow, _playerRoomColumn);
+	_currentRoom->MarkAdjacentMovementSpots(_playerRoomRow, _playerRoomColumn);
+	_lastPlayerAction = ActionType::Move;
 }
 
 void APlayerTopDownController::HandlePlayerPushAction()
 {
+	auto worldState = _currentRoom->GetWorldState();
 
+	int leftSide = _playerRoomColumn - 1;
+	int rightSide = _playerRoomColumn + 1;
+	int topSide = _playerRoomRow - 1;
+	int bottomSide = _playerRoomRow + 1;
+
+	int floorRows = _currentRoom->GetRowCount() - 2;
+	int floorColumns = _currentRoom->GetColumnCount();
+
+	_currentRoom->ClearAllTilesStatus();
+
+	if (leftSide >= 0 && worldState[_playerRoomRow][leftSide] == WorldElementType::Enemy)
+	{
+		_currentRoom->MarkTile(_playerRoomRow, leftSide);
+	}
+	if (rightSide <= floorColumns && worldState[_playerRoomRow][rightSide] == WorldElementType::Enemy)
+	{
+		_currentRoom->MarkTile(_playerRoomRow, rightSide);
+	}
+	if (topSide >= 0 && worldState[topSide][_playerRoomColumn] == WorldElementType::Enemy)
+	{
+		_currentRoom->MarkTile(topSide, _playerRoomColumn);
+	}
+	if (bottomSide <= floorRows && worldState[bottomSide][_playerRoomColumn] == WorldElementType::Enemy)
+	{
+		_currentRoom->MarkTile(bottomSide, _playerRoomColumn);
+	}
+
+	_lastPlayerAction = ActionType::Push;
 }
 
 void APlayerTopDownController::HandlePlayerAttackAction()
 {
+	auto worldState = _currentRoom->GetWorldState();
 
+	int leftSide = _playerRoomColumn - 1;
+	int rightSide = _playerRoomColumn + 1;
+	int topSide = _playerRoomRow - 1;
+	int bottomSide = _playerRoomRow + 1;
+
+	int floorRows = _currentRoom->GetRowCount() - 2;
+	int floorColumns = _currentRoom->GetColumnCount();
+
+	_currentRoom->ClearAllTilesStatus();
+
+	if (leftSide >= 0 && worldState[_playerRoomRow][leftSide] == WorldElementType::Enemy)
+	{
+		_currentRoom->MarkTile(_playerRoomRow, leftSide);
+	}
+	if (rightSide <= floorColumns && worldState[_playerRoomRow][rightSide] == WorldElementType::Enemy)
+	{
+		_currentRoom->MarkTile(_playerRoomRow, rightSide);
+	}
+	if (topSide >= 0 && worldState[topSide][_playerRoomColumn] == WorldElementType::Enemy)
+	{
+		_currentRoom->MarkTile(topSide, _playerRoomColumn);
+	}
+	if (bottomSide <= floorRows && worldState[bottomSide][_playerRoomColumn] == WorldElementType::Enemy)
+	{
+		_currentRoom->MarkTile(bottomSide, _playerRoomColumn);
+	}
+
+	_lastPlayerAction = ActionType::Attack;
 }
 
 void APlayerTopDownController::HandlePlayerSpearAction()
 {
-
+	// TODO: Implement this function...
+	_lastPlayerAction = ActionType::SpearThrow;
 }
 
 void APlayerTopDownController::HandlePlayerJumpAction()
 {
-
+	// TODO: Implement this function...
+	_lastPlayerAction = ActionType::Jump;
 }

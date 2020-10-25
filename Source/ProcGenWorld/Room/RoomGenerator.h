@@ -99,7 +99,8 @@ public:
 	ATile* GetTileAtPosition(int row, int column);
 	AEnemyControllerBase* GetEnemyAtPosition(int row, int column);
 	void ClearAllTilesStatus();
-	void MarkValidSpots(int currentRow, int currentColumn);
+	void MarkAdjacentMovementSpots(int currentRow, int currentColumn);
+	void MarkTile(int row, int column);
 
 	TMap<int, TMap<int, WorldElementType>> GetWorldState();
 

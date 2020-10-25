@@ -317,7 +317,7 @@ void ARoomGenerator::ClearAllTilesStatus()
 	}
 }
 
-void ARoomGenerator::MarkValidSpots(int currentRow, int currentColumn)
+void ARoomGenerator::MarkAdjacentMovementSpots(int currentRow, int currentColumn)
 {
 	ClearAllTilesStatus();
 
@@ -369,6 +369,12 @@ void ARoomGenerator::MarkValidSpots(int currentRow, int currentColumn)
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Bottom Is Same");
 	}
 }
+
+void ARoomGenerator::MarkTile(int row, int column)
+{
+	_floorMatrix[row][column]->MarkTileMoveable(TileMarkerMaterial);
+}
+
 
 TMap<int, TMap<int, WorldElementType>> ARoomGenerator::GetWorldState()
 {

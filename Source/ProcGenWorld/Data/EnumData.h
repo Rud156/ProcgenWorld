@@ -10,7 +10,8 @@ enum class ActionType : uint8
 	Move,
 	Attack,
 	Push,
-	SpearThrow
+	SpearThrow,
+	Jump
 };
 
 UENUM(BlueprintType)

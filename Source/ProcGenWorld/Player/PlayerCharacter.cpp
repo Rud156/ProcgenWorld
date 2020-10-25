@@ -193,12 +193,8 @@ void APlayerCharacter::MoveRight()
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Move Right");
 }
 
-bool APlayerCharacter::HandleMouseClicked(FHitResult hitResult, ATile* tile)
+bool APlayerCharacter::MoveToTilePosition(FHitResult hitResult, ATile* tile)
 {
-	if (_currentInputLockDelay > 0) {
-		return false;
-	}
-
 	_currentInputLockDelay = InputLockTime;
 
 	FVector targetLocation = tile->TileCenter;

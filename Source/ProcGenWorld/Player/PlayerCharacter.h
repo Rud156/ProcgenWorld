@@ -105,7 +105,7 @@ public:
 	void MoveLeft();
 	void MoveRight();
 
-	bool HandleMouseClicked(FHitResult hitResult, ATile* tile);
+	bool MoveToTilePosition(FHitResult hitResult, ATile* tile);
 
 #pragma endregion
 

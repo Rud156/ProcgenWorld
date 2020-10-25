@@ -52,16 +52,12 @@ void ATile::MarkTileMoveable(UMaterialInstance* markedMaterial)
 {
 	_isMoveable = true;
 	SetTileMarkedMaterial(markedMaterial);
-
-	// TODO: Complete this function...
 }
 
 void ATile::ClearTileMoveableStatus(UMaterialInstance* defaultMaterial)
 {
 	_isMoveable = false;
 	SetTileUnMarkedMaterial(defaultMaterial);
-
-	// TODO: Complete this function...
 }
 
 int ATile::GetRow()

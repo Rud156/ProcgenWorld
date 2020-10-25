@@ -29,6 +29,11 @@ void ADungeonGenerator::BeginPlay()
 	_maxRow = -1;
 	_minColumn = 999;
 	_maxColumn = -1;
+
+	GenerateRoomBase();
+	SpawnRooms();
+
+	OnGenerationComplete.Broadcast();
 }
 
 // Called every frame

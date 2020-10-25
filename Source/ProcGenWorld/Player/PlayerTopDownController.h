@@ -71,12 +71,23 @@ public:
 	int GetPlayerRow();
 	int GetPlayerColumn();
 
-	void ResetPlayerHealth();
+	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
+		int GetPlayerHealth();
+	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
+		int GetPlayerMaxHealth();
+	UFUNCTION(Category = Display, BlueprintCallable)
+		void ResetPlayerHealth();
 	void IncreasePlayerHealth(int amount);
-	void TakeDamage(int damageAmount);
+	UFUNCTION(Category = Display, BlueprintCallable)
+		void TakeDamage(int damageAmount);
 	void HandlePlayerDied();
 
-	void ResetPlayerMana();
+	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
+		int GetPlayerMana();
+	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
+		int GetPlayerMaxMana();
+	UFUNCTION(Category = Display, BlueprintCallable)
+		void ResetPlayerMana();
 	void IncreasePlayerMana(int amount);
 	bool HasMana(int manaAmount);
 	void UseMana(int manaAmount);

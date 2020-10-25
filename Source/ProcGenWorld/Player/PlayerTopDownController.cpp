@@ -138,6 +138,16 @@ int APlayerTopDownController::GetPlayerColumn()
 	return _playerRoomColumn;
 }
 
+int APlayerTopDownController::GetPlayerHealth()
+{
+	return  _currentHP;
+}
+
+int APlayerTopDownController::GetPlayerMaxHealth()
+{
+	return _maxHP;
+}
+
 void APlayerTopDownController::ResetPlayerHealth()
 {
 	_currentHP = _maxHP;
@@ -160,6 +170,16 @@ void APlayerTopDownController::TakeDamage(int damageAmount)
 void APlayerTopDownController::HandlePlayerDied()
 {
 	OnPlayerDied.Broadcast();
+}
+
+int APlayerTopDownController::GetPlayerMana()
+{
+	return _currentMana;
+}
+
+int APlayerTopDownController::GetPlayerMaxMana()
+{
+	return _maxMana;
 }
 
 void APlayerTopDownController::ResetPlayerMana()

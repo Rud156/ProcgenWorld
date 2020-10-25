@@ -69,6 +69,7 @@ void AGameController::EndPlayerTurn()
 
 	_playerTopDownController->DisablePlayerTurn();
 
+	// TODO: Change this to something else...
 	auto enemies = _currentRoom->GetEnemies();
 	for (int i = 0; i < enemies.Num(); i++)
 	{

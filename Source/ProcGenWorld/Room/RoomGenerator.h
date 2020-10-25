@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+#include "../Data/EnumData.h"
+
 #include "RoomGenerator.generated.h"
 
 class ATile;
@@ -80,10 +83,7 @@ public:
 
 #pragma endregion
 
-	// Sets default values for this actor's properties
 	ARoomGenerator();
-
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	void LoadRoomFromFile(FString roomName, FVector startPosition);
@@ -91,8 +91,12 @@ public:
 	void HandleUnitDied(AEnemyControllerBase* enemy);
 
 	ATile* GetRandomTileInRoom(int& row, int& column);
+	ATile* GetTileAtPosition(int row, int column);
+	AEnemyControllerBase* GetEnemyAtPosition(int row, int column);
 	void ClearAllTilesStatus();
 	void MarkValidSpots(int currentRow, int currentColumn);
+
+	TMap<int, TMap<int, WorldElementType>> GetWorldState();
 
 	FString GetRoomName();
 	FVector GetStartPosition();
@@ -120,8 +124,6 @@ public:
 		void UpdateFloorMaterial(int roomType);
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	virtual void Destroyed() override;
 };

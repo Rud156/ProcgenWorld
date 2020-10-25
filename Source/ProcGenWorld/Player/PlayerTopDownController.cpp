@@ -20,12 +20,21 @@ APlayerTopDownController::APlayerTopDownController()
 
 	TopDownSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("TopDownSceneComponent"));
 	RootComponent = TopDownSceneComponent;
+
+	MaxHealth = 3;
+	MaxMana = 5;
+
 }
 
 // Called when the game starts or when spawned
 void APlayerTopDownController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	_currentHP = MaxHealth;
+	_currentMana = MaxMana;
+	_maxHP = MaxHealth;
+	_maxMana = MaxMana;
 }
 
 // Called every frame
@@ -125,4 +134,48 @@ int APlayerTopDownController::GetPlayerRow()
 int APlayerTopDownController::GetPlayerColumn()
 {
 	return _playerRoomColumn;
+}
+
+void APlayerTopDownController::ResetPlayerHealth()
+{
+	_currentHP = _maxHP;
+}
+
+void APlayerTopDownController::IncreasePlayerHealth(int amount)
+{
+	_maxHP += amount;
+}
+
+void APlayerTopDownController::TakeDamage(int damageAmount)
+{
+	_currentHP -= damageAmount;
+	if (_currentHP <= 0)
+	{
+		HandlePlayerDied();
+	}
+}
+
+void APlayerTopDownController::HandlePlayerDied()
+{
+	OnPlayerDied.Broadcast();
+}
+
+void APlayerTopDownController::ResetPlayerMana()
+{
+	_currentMana = _maxMana;
+}
+
+void APlayerTopDownController::IncreasePlayerMana(int amount)
+{
+	_maxMana += amount;
+}
+
+bool APlayerTopDownController::HasMana(int manaAmount)
+{
+	return _currentMana >= manaAmount;
+}
+
+void APlayerTopDownController::UseMana(int manaAmount)
+{
+	_currentMana -= manaAmount;
 }

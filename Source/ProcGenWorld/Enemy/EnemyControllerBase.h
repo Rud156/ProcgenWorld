@@ -15,17 +15,20 @@ class PROCGENWORLD_API AEnemyControllerBase : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
+	UPROPERTY(Category = EnemyStats, EditAnywhere)
+		float MaxHealth;
+
 	AEnemyControllerBase();
-
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(Category = Movement, BlueprintImplementableEvent)
+		void MoveEnemyTo(FVector targetLocation);
 
 	void SetParentRoom(ARoomGenerator* roomGenerator);
 	void SetSpawnPosition(int row, int column);
+	int GetRow();
+	int GetColumn();
 
 	void TakeDamage(int damageAmount);
 	void HandleUnitDied();
@@ -45,7 +48,6 @@ protected:
 
 #pragma endregion
 
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void Move(int row, int column);

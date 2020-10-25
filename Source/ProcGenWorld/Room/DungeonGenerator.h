@@ -119,10 +119,7 @@ public:
 
 #pragma endregion
 
-	// Sets default values for this actor's properties
 	ADungeonGenerator();
-
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(Category = Rooms, BlueprintCallable, BlueprintPure)
@@ -156,6 +153,5 @@ public:
 
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 };

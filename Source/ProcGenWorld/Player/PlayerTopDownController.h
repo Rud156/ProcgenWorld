@@ -10,6 +10,8 @@ class APlayerCharacter;
 class ARoomGenerator;
 class APlayerSpawn;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDied);
+
 UCLASS()
 class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
@@ -22,6 +24,11 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	APlayerSpawn* _playerSpawn;
 	ARoomGenerator* _currentRoom;
 
+	int _maxHP;
+	int _currentHP;
+	int _maxMana;
+	int _currentMana;
+
 	int _playerRoomRow;
 	int _playerRoomColumn;
 
@@ -30,20 +37,28 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	void HandleMouseClicked();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
+
+#pragma region Properties
+
 	UPROPERTY(Category = Position, EditAnywhere)
 		FVector FollowOffset;
 
-	// Sets default values for this pawn's properties
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float MaxHealth;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float MaxMana;
+
+	UPROPERTY(Category = Spawning, BlueprintAssignable)
+		FPlayerDied OnPlayerDied;
+
+#pragma endregion
+
 	APlayerTopDownController();
-
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void SetDefaultProperties(APlayerCharacter* playerCharacter, APlayerSpawn* playerSpawn);
@@ -55,4 +70,14 @@ public:
 
 	int GetPlayerRow();
 	int GetPlayerColumn();
+
+	void ResetPlayerHealth();
+	void IncreasePlayerHealth(int amount);
+	void TakeDamage(int damageAmount);
+	void HandlePlayerDied();
+
+	void ResetPlayerMana();
+	void IncreasePlayerMana(int amount);
+	bool HasMana(int manaAmount);
+	void UseMana(int manaAmount);
 };

@@ -37,10 +37,7 @@ public:
 
 #pragma endregion
 
-	// Sets default values for this actor's properties
 	ATile();
-
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(Category = Display, BlueprintImplementableEvent)
@@ -60,7 +57,6 @@ public:
 	int GetColumn();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 };

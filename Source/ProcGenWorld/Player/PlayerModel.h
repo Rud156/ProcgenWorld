@@ -15,16 +15,12 @@ class PROCGENWORLD_API APlayerModel : public AActor
 		class USkeletalMeshComponent* PlayerMesh;
 
 public:
-	// Sets default values for this actor's properties
 	APlayerModel();
-
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(Category = Mesh, BlueprintReadonly)
 		USkeletalMeshComponent* PlayerMeshComponent;
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 };

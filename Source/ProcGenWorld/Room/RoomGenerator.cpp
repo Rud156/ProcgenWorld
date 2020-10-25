@@ -3,7 +3,10 @@
 
 #include "RoomGenerator.h"
 #include "Tile.h"
+#include "../Player/PlayerTopDownController.h"
 #include "../Enemy/EnemyControllerBase.h"
+
+#include "Kismet/GameplayStatics.h"
 
 #include "Math/UnrealMathUtility.h"
 #include "Misc/OutputDeviceNull.h"
@@ -275,7 +278,6 @@ void ARoomGenerator::HandleUnitDied(AEnemyControllerBase* enemy)
 	}
 }
 
-
 ATile* ARoomGenerator::GetRandomTileInRoom(int& row, int& column)
 {
 	int randomRow = FMath::RandRange(0, _rowCount - 2);
@@ -286,6 +288,26 @@ ATile* ARoomGenerator::GetRandomTileInRoom(int& row, int& column)
 
 	ATile* randomTile = _floorMatrix[randomRow][randomColumn];
 	return randomTile;
+}
+
+ATile* ARoomGenerator::GetTileAtPosition(int row, int column)
+{
+	ATile* tile = _floorMatrix[row][column];
+	return  tile;
+}
+
+AEnemyControllerBase* ARoomGenerator::GetEnemyAtPosition(int row, int column)
+{
+	for (int i = 0; i < _roomEnemies.Num(); i++)
+	{
+		auto enemy = _roomEnemies[i];
+		if (enemy->GetRow() == row && enemy->GetColumn() == column)
+		{
+			return enemy;
+		}
+	}
+
+	return nullptr;
 }
 
 void ARoomGenerator::ClearAllTilesStatus()
@@ -346,6 +368,48 @@ void ARoomGenerator::MarkValidSpots(int currentRow, int currentColumn)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Bottom Is Same");
 	}
+}
+
+TMap<int, TMap<int, WorldElementType>> ARoomGenerator::GetWorldState()
+{
+	TMap<int, TMap<int, WorldElementType>> worldState = TMap<int, TMap<int, WorldElementType>>();
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerTopDownController::StaticClass());
+	APlayerTopDownController* playerController = Cast<APlayerTopDownController>(playerActor);
+
+	for (int i = 0; i < _rowCount - 1; i++)
+	{
+		if (!worldState.Contains(i)) {
+			worldState.Add(i, TMap<int, WorldElementType>());
+		}
+
+		for (int j = 0; j <= _columnCount; j++)
+		{
+			ATile* tile = _floorMatrix[i][j];
+			AEnemyControllerBase* enemy = GetEnemyAtPosition(i, j);
+
+			int playerRow = playerController->GetPlayerRow();
+			int playerColumn = playerController->GetPlayerColumn();
+
+			if (i == playerRow && j == playerColumn)
+			{
+				worldState[i].Add(j, WorldElementType::Player);
+			}
+			else if (enemy != nullptr)
+			{
+				worldState[i].Add(j, WorldElementType::Enemy);
+			}
+			else if (tile->TileType == TileType::LavaTile)
+			{
+				worldState[i].Add(j, WorldElementType::LavaTile);
+			}
+			else
+			{
+				worldState[i].Add(j, WorldElementType::Floor);
+			}
+		}
+	}
+
+	return  worldState;
 }
 
 FString ARoomGenerator::GetRoomName()

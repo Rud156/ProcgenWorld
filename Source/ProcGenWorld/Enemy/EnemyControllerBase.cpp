@@ -4,6 +4,7 @@
 #include "EnemyControllerBase.h"
 #include "../Player/PlayerTopDownController.h"
 #include "../Room/RoomGenerator.h"
+#include "../Room/Tile.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -12,6 +13,8 @@ AEnemyControllerBase::AEnemyControllerBase()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	MaxHealth = 1;
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +28,8 @@ void AEnemyControllerBase::BeginPlay()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Unable To Find Player Controller!!!");
 	}
+
+	_health = MaxHealth;
 }
 
 // Called every frame
@@ -50,6 +55,15 @@ void AEnemyControllerBase::SetSpawnPosition(int row, int column)
 	_currentColumn = column;
 }
 
+int AEnemyControllerBase::GetRow()
+{
+	return _currentRow;
+}
+
+int AEnemyControllerBase::GetColumn()
+{
+	return _currentColumn;
+}
 
 void AEnemyControllerBase::TakeDamage(int damageAmount)
 {
@@ -67,11 +81,16 @@ void AEnemyControllerBase::HandleUnitDied()
 
 void AEnemyControllerBase::Execute()
 {
-
 }
 
 void AEnemyControllerBase::Move(int row, int column)
 {
+	ATile* targetTile = _parentRoom->GetTileAtPosition(row, column);
+	FVector tileCenter = targetTile->TileCenter;
 
+	MoveEnemyTo(tileCenter);
+
+	_currentRow = row;
+	_currentColumn = column;
 }
 

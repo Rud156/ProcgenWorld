@@ -39,3 +39,12 @@ enum class PickupType : uint8
 {
 	Spear
 };
+
+UENUM(BlueprintType)
+enum class WorldElementType : uint8
+{
+	Player,
+	Enemy,
+	LavaTile,
+	Floor,
+};

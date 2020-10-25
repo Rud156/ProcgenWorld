@@ -26,6 +26,7 @@ class PROCGENWORLD_API AGameController : public AActor
 #pragma endregion
 
 	void BeginPlayerTurn();
+	void ExecuteEnemyAI();
 
 public:
 	// Sets default values for this actor's properties
@@ -35,7 +36,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(Category = Timing, EditAnywhere)
-		float DefaultTurnTime;
+		float PlayerTurnWaitTime;
+
+	UPROPERTY(Category = Timing, EditAnywhere)
+		float AITurnWaitTime;
 
 	UFUNCTION(Category = Timing, BlueprintCallable)
 		void EndPlayerTurn();

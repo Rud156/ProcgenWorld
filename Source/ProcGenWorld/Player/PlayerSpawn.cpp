@@ -103,7 +103,7 @@ void APlayerSpawn::SpawnPlayer()
 	_playerModel = Cast<APlayerModel>(playerModelActor);
 	_playerCharacter = Cast<APlayerCharacter>(playerCharacterActor);
 	_playerTopDownController = Cast<APlayerTopDownController>(playerTopDownControllerActor);
-	
+
 	APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	controller->UnPossess();
 	controller->Possess(_playerTopDownController);
@@ -115,16 +115,14 @@ void APlayerSpawn::SpawnPlayer()
 	_victoryTrigger->SetActorLocation(exitRoom->GetStartPosition() + TriggerBoxSpawnOffset);
 	_victoryTrigger->SetActorScale3D(TriggerBoxSpawnScale);
 
-	_playerTopDownController->SetDefaultProperties(_playerCharacter, this);
+	_playerTopDownController->SetDefaultProperties(_playerCharacter, _gameController);
 	_playerTopDownController->SetCurrentRoom(spawnRoom);
 	_playerTopDownController->SetPlayerRowAndColumn(row, column);
 	_playerTopDownController->DisablePlayerTurn();
-	
+
 	_gameController->SetPlayerTopDownController(_playerTopDownController);
 	_gameController->SetCurrentRoom(spawnRoom);
-
 	_dungeonGen->SetPlayerController(_playerTopDownController);
-	spawnRoom->SpawnEnemies();
 
 	OnPlayerSpawnComplete.Broadcast(_playerCharacter);
 }

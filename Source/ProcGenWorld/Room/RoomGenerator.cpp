@@ -473,16 +473,7 @@ void ARoomGenerator::SpawnEnemies()
 {
 	_roomEnemies = TArray<AEnemyControllerBase*>();
 
-	int row;
-	int column;
-	ATile* randomTile = GetRandomTileInRoom(row, column);
-
-	AActor* enemyActor = GetWorld()->SpawnActor(Enemies[0], &randomTile->TileCenter, &FRotator::ZeroRotator);
-	AEnemyControllerBase* enemyInstance = Cast<AEnemyControllerBase>(enemyActor);
-
-	enemyInstance->SetSpawnPosition(row, column);
-	enemyInstance->SetParentRoom(this);
-	_roomEnemies.Add(enemyInstance);
+	// TODO: Implement this function...
 }
 
 TArray<AEnemyControllerBase*> ARoomGenerator::GetEnemies()

@@ -11,6 +11,9 @@ AGameController::AGameController()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	PlayerTurnWaitTime = 10;
+	AITurnWaitTime = 3;
 }
 
 // Called when the game starts or when spawned
@@ -53,11 +56,10 @@ void AGameController::SetCurrentRoom(ARoomGenerator* currentRoom)
 	_currentRoom = currentRoom;
 }
 
-
 void AGameController::BeginPlayerTurn()
 {
 	_isPlayerTurn = true;
-	_currentTurnTime = DefaultTurnTime;
+	_currentTurnTime = PlayerTurnWaitTime;
 
 	_playerTopDownController->EnablePlayerTurn();
 }
@@ -65,11 +67,14 @@ void AGameController::BeginPlayerTurn()
 void AGameController::EndPlayerTurn()
 {
 	_isPlayerTurn = false;
-	_currentTurnTime = DefaultTurnTime;
+	_currentTurnTime = AITurnWaitTime;
 
 	_playerTopDownController->DisablePlayerTurn();
+	ExecuteEnemyAI();
+}
 
-	// TODO: Change this to something else...
+void AGameController::ExecuteEnemyAI()
+{
 	auto enemies = _currentRoom->GetEnemies();
 	for (int i = 0; i < enemies.Num(); i++)
 	{

@@ -6,6 +6,7 @@
 #include "PlayerSpawn.h"
 #include "../Room/Tile.h"
 #include "../Room/RoomGenerator.h"
+#include "../Game/GameController.h"
 
 #include "Components/SceneComponent.h"
 
@@ -84,7 +85,9 @@ void APlayerTopDownController::HandleMouseClicked()
 			{
 				_playerRoomRow = tile->GetRow();
 				_playerRoomColumn = tile->GetColumn();
-				_currentRoom->MarkValidSpots(_playerRoomRow, _playerRoomColumn);
+
+				_currentRoom->ClearAllTilesStatus();
+				_gameController->EndPlayerTurn();
 			}
 		}
 		else
@@ -99,10 +102,10 @@ void APlayerTopDownController::HandleMouseClicked()
 	}
 }
 
-void APlayerTopDownController::SetDefaultProperties(APlayerCharacter* playerCharacter, APlayerSpawn* playerSpawn)
+void APlayerTopDownController::SetDefaultProperties(APlayerCharacter* playerCharacter, AGameController* gameController)
 {
 	_playerCharacter = playerCharacter;
-	_playerSpawn = playerSpawn;
+	_gameController = gameController;
 }
 
 void APlayerTopDownController::SetCurrentRoom(ARoomGenerator* roomGenerator)
@@ -114,8 +117,6 @@ void APlayerTopDownController::SetPlayerRowAndColumn(int row, int column)
 {
 	_playerRoomRow = row;
 	_playerRoomColumn = column;
-
-	_currentRoom->MarkValidSpots(_playerRoomRow, _playerRoomColumn);
 }
 
 void APlayerTopDownController::EnablePlayerTurn()
@@ -127,6 +128,12 @@ void APlayerTopDownController::DisablePlayerTurn()
 {
 	_isPlayerTurn = false;
 }
+
+bool APlayerTopDownController::GetIsPlayerTurn()
+{
+	return _isPlayerTurn;
+}
+
 
 int APlayerTopDownController::GetPlayerRow()
 {
@@ -200,4 +207,29 @@ bool APlayerTopDownController::HasMana(int manaAmount)
 void APlayerTopDownController::UseMana(int manaAmount)
 {
 	_currentMana -= manaAmount;
+}
+
+void APlayerTopDownController::HandlePlayerMoveAction()
+{
+	_currentRoom->MarkValidSpots(_playerRoomRow, _playerRoomColumn);
+}
+
+void APlayerTopDownController::HandlePlayerPushAction()
+{
+
+}
+
+void APlayerTopDownController::HandlePlayerAttackAction()
+{
+
+}
+
+void APlayerTopDownController::HandlePlayerSpearAction()
+{
+
+}
+
+void APlayerTopDownController::HandlePlayerJumpAction()
+{
+
 }

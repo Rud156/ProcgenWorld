@@ -9,6 +9,7 @@
 class APlayerCharacter;
 class ARoomGenerator;
 class APlayerSpawn;
+class AGameController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDied);
 
@@ -20,8 +21,8 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
 		class USceneComponent* TopDownSceneComponent;
 
+	AGameController* _gameController;
 	APlayerCharacter* _playerCharacter;
-	APlayerSpawn* _playerSpawn;
 	ARoomGenerator* _currentRoom;
 
 	int _maxHP;
@@ -61,12 +62,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void SetDefaultProperties(APlayerCharacter* playerCharacter, APlayerSpawn* playerSpawn);
+	void SetDefaultProperties(APlayerCharacter* playerCharacter, AGameController* gameController);
 	void SetCurrentRoom(ARoomGenerator* roomGenerator);
 	void SetPlayerRowAndColumn(int row, int column);
 
 	void EnablePlayerTurn();
 	void DisablePlayerTurn();
+	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
+		bool GetIsPlayerTurn();
 
 	int GetPlayerRow();
 	int GetPlayerColumn();
@@ -91,4 +94,19 @@ public:
 	void IncreasePlayerMana(int amount);
 	bool HasMana(int manaAmount);
 	void UseMana(int manaAmount);
+
+	UFUNCTION(Category = Actions, BlueprintCallable)
+		void HandlePlayerMoveAction();
+
+	UFUNCTION(Category = Actions, BlueprintCallable)
+		void HandlePlayerPushAction();
+
+	UFUNCTION(Category = Actions, BlueprintCallable)
+		void HandlePlayerSpearAction();
+
+	UFUNCTION(Category = Actions, BlueprintCallable)
+		void HandlePlayerAttackAction();
+
+	UFUNCTION(Category = Actions, BlueprintCallable)
+		void HandlePlayerJumpAction();
 };

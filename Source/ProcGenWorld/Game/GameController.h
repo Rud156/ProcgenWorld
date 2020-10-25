@@ -7,6 +7,7 @@
 #include "GameController.generated.h"
 
 class APlayerTopDownController;
+class ARoomGenerator;
 
 
 UCLASS()
@@ -17,6 +18,7 @@ class PROCGENWORLD_API AGameController : public AActor
 #pragma region Properties
 
 	APlayerTopDownController* _playerTopDownController;
+	ARoomGenerator* _currentRoom;
 
 	bool _isPlayerTurn;
 	float _currentTurnTime;
@@ -45,6 +47,7 @@ public:
 		float GetTurnTime();
 
 	void SetPlayerTopDownController(APlayerTopDownController* playerTopDownController);
+	void SetCurrentRoom(ARoomGenerator* currentRoom);
 
 protected:
 	// Called when the game starts or when spawned

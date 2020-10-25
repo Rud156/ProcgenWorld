@@ -9,6 +9,7 @@
 #include "DungeonGenerator.generated.h"
 
 class ARoomGenerator;
+class APlayerTopDownController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGenerationComplete);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGenerationStarted);
@@ -144,6 +145,7 @@ public:
 		void RegenrateRooms();
 
 	ARoomGenerator* GetRoom(int row, int column);
+	void SetPlayerController(APlayerTopDownController* playerController);
 
 	int GetSpawnRow();
 	int GetSpawnColumn();

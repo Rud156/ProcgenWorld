@@ -14,7 +14,7 @@ class PROCGENWORLD_API AWarriorController : public AEnemyControllerBase
 {
 	GENERATED_BODY()
 
-		void FindTargetRowAndColumn(int& row, int& column);
+	void FindTargetRowAndColumn(int& row, int& column);
 	bool IsPlayerInAdjacentTile();
 
 	void Attack();

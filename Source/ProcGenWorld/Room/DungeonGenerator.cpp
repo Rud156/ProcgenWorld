@@ -106,6 +106,20 @@ ARoomGenerator* ADungeonGenerator::GetRoom(int row, int column)
 	return _rooms[row][column];
 }
 
+void ADungeonGenerator::SetPlayerController(APlayerTopDownController* playerController)
+{
+	for (int i = _minRow; i <= _maxRow; i++)
+	{
+		for (int j = _minColumn; j <= _maxColumn; j++)
+		{
+			if (_rooms[i].Contains(j)) {
+				_rooms[i][j]->SetPlayerController(playerController);
+			}
+		}
+	}
+}
+
+
 int ADungeonGenerator::GetSpawnRow()
 {
 	return _spawnRoomRow;

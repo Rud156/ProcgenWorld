@@ -373,8 +373,6 @@ void ARoomGenerator::MarkValidSpots(int currentRow, int currentColumn)
 TMap<int, TMap<int, WorldElementType>> ARoomGenerator::GetWorldState()
 {
 	TMap<int, TMap<int, WorldElementType>> worldState = TMap<int, TMap<int, WorldElementType>>();
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerTopDownController::StaticClass());
-	APlayerTopDownController* playerController = Cast<APlayerTopDownController>(playerActor);
 
 	for (int i = 0; i < _rowCount - 1; i++)
 	{
@@ -387,8 +385,8 @@ TMap<int, TMap<int, WorldElementType>> ARoomGenerator::GetWorldState()
 			ATile* tile = _floorMatrix[i][j];
 			AEnemyControllerBase* enemy = GetEnemyAtPosition(i, j);
 
-			int playerRow = playerController->GetPlayerRow();
-			int playerColumn = playerController->GetPlayerColumn();
+			int playerRow = _playerController->GetPlayerRow();
+			int playerColumn = _playerController->GetPlayerColumn();
 
 			if (i == playerRow && j == playerColumn)
 			{
@@ -398,7 +396,7 @@ TMap<int, TMap<int, WorldElementType>> ARoomGenerator::GetWorldState()
 			{
 				worldState[i].Add(j, WorldElementType::Enemy);
 			}
-			else if (tile->TileType == TileType::LavaTile)
+			else if (tile != nullptr && tile->TileType == TileType::LavaTile)
 			{
 				worldState[i].Add(j, WorldElementType::LavaTile);
 			}
@@ -464,6 +462,32 @@ int ARoomGenerator::GetRowCount()
 int ARoomGenerator::GetColumnCount()
 {
 	return _columnCount;
+}
+
+void ARoomGenerator::SetPlayerController(APlayerTopDownController* playerController)
+{
+	_playerController = playerController;
+}
+
+void ARoomGenerator::SpawnEnemies()
+{
+	_roomEnemies = TArray<AEnemyControllerBase*>();
+
+	int row;
+	int column;
+	ATile* randomTile = GetRandomTileInRoom(row, column);
+
+	AActor* enemyActor = GetWorld()->SpawnActor(Enemies[0], &randomTile->TileCenter, &FRotator::ZeroRotator);
+	AEnemyControllerBase* enemyInstance = Cast<AEnemyControllerBase>(enemyActor);
+
+	enemyInstance->SetSpawnPosition(row, column);
+	enemyInstance->SetParentRoom(this);
+	_roomEnemies.Add(enemyInstance);
+}
+
+TArray<AEnemyControllerBase*> ARoomGenerator::GetEnemies()
+{
+	return  _roomEnemies;
 }
 
 bool ARoomGenerator::IsRoomCleared()

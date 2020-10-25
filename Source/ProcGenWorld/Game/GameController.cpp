@@ -3,6 +3,8 @@
 
 #include "GameController.h"
 #include "../Player/PlayerTopDownController.h"
+#include "../Enemy/EnemyControllerBase.h"
+#include "../Room/RoomGenerator.h"
 
 // Sets default values
 AGameController::AGameController()
@@ -15,6 +17,8 @@ AGameController::AGameController()
 void AGameController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("Hello World!!!"));
 }
 
 // Called every frame
@@ -44,6 +48,11 @@ void AGameController::SetPlayerTopDownController(APlayerTopDownController* playe
 	BeginPlayerTurn();
 }
 
+void AGameController::SetCurrentRoom(ARoomGenerator* currentRoom)
+{
+	_currentRoom = currentRoom;
+}
+
 
 void AGameController::BeginPlayerTurn()
 {
@@ -59,6 +68,12 @@ void AGameController::EndPlayerTurn()
 	_currentTurnTime = DefaultTurnTime;
 
 	_playerTopDownController->DisablePlayerTurn();
+
+	auto enemies = _currentRoom->GetEnemies();
+	for (int i = 0; i < enemies.Num(); i++)
+	{
+		enemies[i]->Execute();
+	}
 }
 
 bool AGameController::GetPlayerTurnStatus()

@@ -93,7 +93,9 @@ void APlayerTopDownController::HandleMouseClicked()
 		}
 	}
 	else {
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, *hitActor->GetName());
+		if (hitActor != nullptr) {
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, *hitActor->GetName());
+		}
 	}
 }
 

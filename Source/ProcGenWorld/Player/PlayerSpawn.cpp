@@ -119,7 +119,12 @@ void APlayerSpawn::SpawnPlayer()
 	_playerTopDownController->SetCurrentRoom(spawnRoom);
 	_playerTopDownController->SetPlayerRowAndColumn(row, column);
 	_playerTopDownController->DisablePlayerTurn();
+	
 	_gameController->SetPlayerTopDownController(_playerTopDownController);
+	_gameController->SetCurrentRoom(spawnRoom);
+
+	_dungeonGen->SetPlayerController(_playerTopDownController);
+	spawnRoom->SpawnEnemies();
 
 	OnPlayerSpawnComplete.Broadcast(_playerCharacter);
 }

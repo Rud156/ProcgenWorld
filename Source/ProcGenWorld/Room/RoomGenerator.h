@@ -11,6 +11,7 @@
 
 class ATile;
 class AEnemyControllerBase;
+class APlayerTopDownController;
 
 UCLASS()
 class PROCGENWORLD_API ARoomGenerator : public AActor
@@ -41,6 +42,7 @@ private:
 	bool _isLerpActive;
 
 	TArray<AEnemyControllerBase*> _roomEnemies;
+	APlayerTopDownController* _playerController;
 	bool _playerEnteredRoom;
 	bool _isRoomCleared;
 
@@ -65,6 +67,9 @@ public:
 
 	UPROPERTY(Category = Wall, EditAnywhere)
 		float WallThickness;
+
+	UPROPERTY(Category = Enemy, EditAnywhere)
+		TArray<TSubclassOf<class AEnemyControllerBase>> Enemies;
 
 	UPROPERTY(Category = Display, EditAnywhere)
 		UMaterialInstance* SpawnMaterial;
@@ -109,6 +114,10 @@ public:
 
 	int GetRowCount();
 	int GetColumnCount();
+
+	void SetPlayerController(APlayerTopDownController* playerController);
+	void SpawnEnemies();
+	TArray<AEnemyControllerBase*> GetEnemies();
 	bool IsRoomCleared();
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)

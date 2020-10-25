@@ -43,6 +43,8 @@ void AArcherController::FindTargetRowAndColumn(int& row, int& column)
 	int rowDiff = FMath::Abs(_currentRow - playerRow);
 	int colDiff = FMath::Abs(_currentColumn - playerColumn);
 
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString::SanitizeFloat(colDiff));
+
 	int floorRows = _parentRoom->GetRowCount() - 2;
 	int floorColumns = _parentRoom->GetColumnCount();
 
@@ -119,17 +121,21 @@ void AArcherController::FindTargetRowAndColumn(int& row, int& column)
 		if (_currentRow < playerRow)
 		{
 			row = _currentRow + 1;
+			column = _currentColumn;
 		}
 		else if (_currentRow > playerRow)
 		{
 			row = _currentRow - 1;
+			column = _currentColumn;
 		}
 		else if (_currentColumn < playerColumn)
 		{
+			row = _currentRow;
 			column = _currentColumn + 1;
 		}
 		else if (_currentColumn > playerColumn)
 		{
+			row = _currentRow;
 			column = _currentColumn - 1;
 		}
 	}
@@ -203,7 +209,7 @@ bool AArcherController::IsPlayerInEnemyView()
 	int floorColumns = _parentRoom->GetColumnCount();
 
 	// Left Side
-	for (int i = _currentColumn; i >= 0; i--)
+	for (int i = _currentColumn - 1; i >= 0; i--)
 	{
 		int diff = FMath::Abs(i - _currentColumn);
 		if (worldState[_currentRow][i] == WorldElementType::Player && diff >= MinAttackDistance)
@@ -217,7 +223,7 @@ bool AArcherController::IsPlayerInEnemyView()
 	}
 
 	// Right Side
-	for (int i = _currentColumn; i <= floorColumns; i++)
+	for (int i = _currentColumn + 1; i <= floorColumns; i++)
 	{
 		int diff = FMath::Abs(i - _currentColumn);
 		if (worldState[_currentRow][i] == WorldElementType::Player && diff >= MinAttackDistance)
@@ -231,7 +237,7 @@ bool AArcherController::IsPlayerInEnemyView()
 	}
 
 	// Top Side
-	for (int i = _currentRow; i >= 0; i--)
+	for (int i = _currentRow - 1; i >= 0; i--)
 	{
 		int diff = FMath::Abs(i - _currentRow);
 		if (worldState[i][_currentColumn] == WorldElementType::Player && diff >= MinAttackDistance)
@@ -245,7 +251,7 @@ bool AArcherController::IsPlayerInEnemyView()
 	}
 
 	// Bottom Side
-	for (int i = _currentRow; i <= floorRows; i++)
+	for (int i = _currentRow + 1; i <= floorRows; i++)
 	{
 		int diff = FMath::Abs(i - _currentRow);
 		if (worldState[i][_currentColumn] == WorldElementType::Player && diff >= MinAttackDistance)

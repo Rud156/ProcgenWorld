@@ -15,6 +15,7 @@ class PROCGENWORLD_API ATile : public AActor
 	GENERATED_BODY()
 
 	ARoomGenerator* _roomParent;
+	PickupType _pickupType;
 	bool _isMoveable;
 
 	int _row;
@@ -55,6 +56,9 @@ public:
 
 	int GetRow();
 	int GetColumn();
+
+	void SetPickupType(PickupType pickupType);
+	PickupType GetPickupType();
 
 protected:
 	virtual void BeginPlay() override;

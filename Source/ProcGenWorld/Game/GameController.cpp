@@ -56,6 +56,16 @@ void AGameController::SetCurrentRoom(ARoomGenerator* currentRoom)
 	_currentRoom = currentRoom;
 }
 
+void AGameController::BeginGame()
+{
+	// TODO: Implement this function...
+}
+
+void AGameController::EndGame(bool winStatus)
+{
+	// TODO: Implement this function...
+}
+
 void AGameController::BeginPlayerTurn()
 {
 	_isPlayerTurn = true;

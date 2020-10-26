@@ -53,6 +53,9 @@ public:
 	void SetPlayerTopDownController(APlayerTopDownController* playerTopDownController);
 	void SetCurrentRoom(ARoomGenerator* currentRoom);
 
+	void BeginGame();
+	void EndGame(bool winStatus);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

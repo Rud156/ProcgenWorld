@@ -31,7 +31,6 @@ class PROCGENWORLD_API APlayerSpawn : public AActor
 
 	ATriggerBox* _victoryTrigger;
 
-
 	UFUNCTION()
 	void RoomGenerationComplete();
 

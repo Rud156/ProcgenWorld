@@ -41,6 +41,9 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	bool _isPlayerTurn;
 
 	void HandleMouseClicked();
+	void Handle1Pressed();
+	void Handle2Pressed();
+	
 	void ExecuteMoveToTileAction(FHitResult hitResult, ATile* tile);
 	void ExecuteAttackTileAction(ATile* tile);
 	void ExecutePushAction(ATile* tile);
@@ -90,6 +93,7 @@ public:
 	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
 		bool GetIsPlayerTurn();
 
+	ARoomGenerator* GetRoomInstance();
 	int GetPlayerRow();
 	int GetPlayerColumn();
 

@@ -38,6 +38,7 @@ enum class TileType : uint8
 UENUM(BlueprintType)
 enum class PickupType : uint8
 {
+	None,
 	Spear
 };
 

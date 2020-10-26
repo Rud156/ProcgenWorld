@@ -14,6 +14,7 @@ ATile::ATile()
 	RootComponent = TileParent;
 
 	TileCenterOffset = FVector(100, 100, 0);
+	_pickupType = PickupType::None;
 }
 
 // Called when the game starts or when spawned
@@ -68,4 +69,14 @@ int ATile::GetRow()
 int ATile::GetColumn()
 {
 	return  _column;
+}
+
+void ATile::SetPickupType(PickupType pickupType)
+{
+	_pickupType = pickupType;
+}
+
+PickupType ATile::GetPickupType()
+{
+	return  _pickupType;
 }

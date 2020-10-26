@@ -7,6 +7,7 @@
 #include "../Enemy/EnemyControllerBase.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetArrayLibrary.h"
 
 #include "Math/UnrealMathUtility.h"
 #include "Misc/OutputDeviceNull.h"
@@ -34,8 +35,10 @@ void ARoomGenerator::BeginPlay()
 
 	_walls = TArray<AActor*>();
 	_floorTiles = TArray<ATile*>();
+	_doors = TArray<AActor*>();
 
 	_isLerpActive = false;
+	_isRoomCleared = false;
 }
 
 void ARoomGenerator::Destroyed()
@@ -274,7 +277,9 @@ void ARoomGenerator::HandleUnitDied(AEnemyControllerBase* enemy)
 	if (_roomEnemies.Num() <= 0)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Room Cleared");
-		_isRoomCleared = true;
+
+		SetRoomCleared();
+		DestroyRoomDoors();
 	}
 }
 
@@ -393,8 +398,9 @@ TMap<int, TMap<int, WorldElementType>> ARoomGenerator::GetWorldState()
 
 			int playerRow = _playerController->GetPlayerRow();
 			int playerColumn = _playerController->GetPlayerColumn();
+			auto roomInstance = _playerController->GetRoomInstance();
 
-			if (i == playerRow && j == playerColumn)
+			if (i == playerRow && j == playerColumn && roomInstance == this)
 			{
 				worldState[i].Add(j, WorldElementType::Player);
 			}
@@ -479,7 +485,49 @@ void ARoomGenerator::SpawnEnemies()
 {
 	_roomEnemies = TArray<AEnemyControllerBase*>();
 
-	// TODO: Implement this function...
+	auto worldState = GetWorldState();
+	TArray<TPair<int, int>> emptyPositions = TArray<TPair<int, int>>();
+
+	for (int i = 0; i < _rowCount - 1; i++)
+	{
+		for (int j = 0; j <= _columnCount; j++)
+		{
+			auto element = worldState[i][j];
+			if (element == WorldElementType::Floor)
+			{
+				TPair<int, int> position = TPair<int, int>();
+				position.Key = i;
+				position.Value = j;
+
+				emptyPositions.Add(position);
+			}
+		}
+	}
+
+	emptyPositions.Sort([this](const TPair<int, int> Item1, const TPair<int, int> Item2)
+		{
+			return FMath::Rand() <= 0.5f;
+		});
+
+	for (int i = 0; i < _roomDepth + 1; i++)
+	{
+		auto tileIndex = emptyPositions[i];
+		ATile* tile = _floorMatrix[tileIndex.Key][tileIndex.Value];
+
+		auto randomEnemyIndex = FMath::FloorToInt(FMath::Rand() * Enemies.Num());
+		auto enemyActor = GetWorld()->SpawnActor(Enemies[randomEnemyIndex], &tile->TileCenter, &FRotator::ZeroRotator);
+		auto enemyInstance = Cast<AEnemyControllerBase>(enemyActor);
+
+		_roomEnemies.Add(enemyInstance);
+	}
+}
+
+void ARoomGenerator::ClearAllEnemies()
+{
+	for (int i = 0; i < _roomEnemies.Num(); i++)
+	{
+		_roomEnemies[i]->TakeDamage(_roomEnemies[i]->GetMaxHealth());
+	}
 }
 
 TArray<AEnemyControllerBase*> ARoomGenerator::GetEnemies()
@@ -487,9 +535,67 @@ TArray<AEnemyControllerBase*> ARoomGenerator::GetEnemies()
 	return  _roomEnemies;
 }
 
+bool ARoomGenerator::IsPlayerInRoom()
+{
+	return  _playerController->GetRoomInstance() == this;
+}
+
 bool ARoomGenerator::IsRoomCleared()
 {
 	return _isRoomCleared;
+}
+
+void ARoomGenerator::SetRoomCleared()
+{
+	_isRoomCleared = true;
+}
+
+void ARoomGenerator::SpawnRoomDoors()
+{
+	_doors.Empty();
+
+	if (_topRowDoorPosition != FVector::ZeroVector)
+	{
+		auto doorInstance = GetWorld()->SpawnActor(DoorPrefab, &_topRowDoorPosition, &FRotator::ZeroRotator);
+		_doors.Add(doorInstance);
+	}
+	if (_bottomRowDoorPosition != FVector::ZeroVector)
+	{
+		auto doorInstance = GetWorld()->SpawnActor(DoorPrefab, &_bottomRowDoorPosition, &FRotator::ZeroRotator);
+		_doors.Add(doorInstance);
+	}
+
+	FRotator rotation90 = FRotator(0, 90, 0);
+	if (_leftColumnDoorPosition != FVector::ZeroVector)
+	{
+		auto doorInstance = GetWorld()->SpawnActor(DoorPrefab, &_leftColumnDoorPosition, &rotation90);
+		_doors.Add(doorInstance);
+	}
+	if (_rightColumnDoorPosition != FVector::ZeroVector)
+	{
+		auto doorInstance = GetWorld()->SpawnActor(DoorPrefab, &_rightColumnDoorPosition, &rotation90);
+		_doors.Add(doorInstance);
+	}
+}
+
+void ARoomGenerator::DestroyRoomDoors()
+{
+	for (int i = 0; i < _doors.Num(); i++)
+	{
+		_doors[i]->Destroy();
+	}
+
+	_doors.Empty();
+}
+
+int ARoomGenerator::GetRoomDepth()
+{
+	return  _roomDepth;
+}
+
+void ARoomGenerator::SetRoomDepth(int roomDepth)
+{
+	_roomDepth = roomDepth;
 }
 
 TArray<ATile*> ARoomGenerator::GetFloorTiles()

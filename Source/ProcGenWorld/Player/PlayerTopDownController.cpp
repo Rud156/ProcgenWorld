@@ -61,6 +61,8 @@ void APlayerTopDownController::SetupPlayerInputComponent(UInputComponent* Player
 	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("LeftClick", EInputEvent::IE_Pressed, this, &APlayerTopDownController::HandleMouseClicked);
+	PlayerInputComponent->BindAction("Key1", EInputEvent::IE_Pressed, this, &APlayerTopDownController::Handle1Pressed);
+	PlayerInputComponent->BindAction("Key2", EInputEvent::IE_Pressed, this, &APlayerTopDownController::Handle2Pressed);
 }
 
 void APlayerTopDownController::HandleMouseClicked()
@@ -105,6 +107,20 @@ void APlayerTopDownController::HandleMouseClicked()
 		if (hitActor != nullptr) {
 			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, *hitActor->GetName());
 		}
+	}
+}
+
+void APlayerTopDownController::Handle1Pressed()
+{
+	ResetPlayerHealth();
+	ResetPlayerMana();
+}
+
+void APlayerTopDownController::Handle2Pressed()
+{
+	if(_currentRoom != nullptr)
+	{
+		_currentRoom->ClearAllEnemies();
 	}
 }
 
@@ -488,7 +504,20 @@ void APlayerTopDownController::ExecutePushAction(ATile* tile)
 
 void APlayerTopDownController::ExecuteSpearThrowAction(ATile* tile)
 {
-	// TODO: Implement this function...
+	int row = tile->GetRow();
+	int column = tile->GetColumn();
+
+	AEnemyControllerBase* enemy = _currentRoom->GetEnemyAtPosition(row, column);
+	if (enemy != nullptr)
+	{
+		enemy->TakeDamage(enemy->GetMaxHealth());
+		_playerHasSpear = false;
+
+		tile->SetPickupType(PickupType::Spear);
+	}
+
+	_currentRoom->ClearAllTilesStatus();
+	_gameController->EndPlayerTurn();
 }
 
 void APlayerTopDownController::ExecuteJumpAction(ATile* tile)
@@ -529,6 +558,10 @@ bool APlayerTopDownController::GetIsPlayerTurn()
 	return _isPlayerTurn;
 }
 
+ARoomGenerator* APlayerTopDownController::GetRoomInstance()
+{
+	return _currentRoom;
+}
 
 int APlayerTopDownController::GetPlayerRow()
 {

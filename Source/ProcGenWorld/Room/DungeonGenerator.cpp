@@ -124,7 +124,6 @@ void ADungeonGenerator::SetPlayerController(APlayerTopDownController* playerCont
 	}
 }
 
-
 int ADungeonGenerator::GetSpawnRow()
 {
 	return _spawnRoomRow;
@@ -292,6 +291,7 @@ void ADungeonGenerator::SpawnRooms()
 	}
 
 	AdjustRoomPositions();
+	SetRoomDepths();
 }
 
 void ADungeonGenerator::AdjustRoomPositions()
@@ -360,6 +360,22 @@ void ADungeonGenerator::AdjustRoomPositions()
 			}
 
 			explored.Add(node);
+		}
+	}
+}
+
+void ADungeonGenerator::SetRoomDepths()
+{
+	for (int i = _minRow; i <= _maxRow; i++) {
+		for (int j = _minColumn; j <= _maxColumn; j++) {
+
+			if (_roomMatrix[i].Contains(j)) {
+				int roomNumber = _roomMatrixCounter[i][j];
+				int spawnRoomNumber = _roomMatrixCounter[_spawnRoomRow][_spawnRoomColumn];
+				int pathLength = FindPathToSpawnRoom(spawnRoomNumber, roomNumber);
+
+				_rooms[i][j]->SetRoomDepth(pathLength);
+			}
 		}
 	}
 }

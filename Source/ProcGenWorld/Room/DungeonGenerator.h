@@ -51,6 +51,7 @@ private:
 	void GenerateRoomBase();
 	void SpawnRooms();
 	void AdjustRoomPositions();
+	void SetRoomDepths();
 
 	void UpdateMinMaxRowColumn(int i, int j);
 	void UpdateRoomMatrixCounter();

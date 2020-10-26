@@ -35,6 +35,9 @@ private:
 	FString _roomName;
 	TArray<AActor*> _walls;
 	TArray<ATile*> _floorTiles;
+	TArray<AActor*> _doors;
+
+	int _roomDepth;
 
 	FVector _lerpStartPosition;
 	FVector _lerpTargetPosition;
@@ -60,7 +63,7 @@ public:
 		TSubclassOf<class AActor> FloorPrefab;
 
 	UPROPERTY(Category = Wall, EditAnywhere)
-		TSubclassOf<class AActor> TestDoorPrefab;
+		TSubclassOf<class AActor> DoorPrefab;
 
 	UPROPERTY(Category = Wall, EditAnywhere)
 		float WallWidth;
@@ -118,8 +121,22 @@ public:
 
 	void SetPlayerController(APlayerTopDownController* playerController);
 	void SpawnEnemies();
+	void ClearAllEnemies();
 	TArray<AEnemyControllerBase*> GetEnemies();
-	bool IsRoomCleared();
+
+	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
+		bool IsPlayerInRoom();
+
+	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
+		bool IsRoomCleared();
+	void SetRoomCleared();
+
+	void SpawnRoomDoors();
+	void DestroyRoomDoors();
+
+	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
+		int GetRoomDepth();
+	void SetRoomDepth(int roomDepth);
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
 		TArray<ATile*> GetFloorTiles();

@@ -512,7 +512,7 @@ int ADungeonGenerator::FindPathToSpawnRoom(int spawnRoomNumber, int startRoomNum
 {
 	TSet<int> explored;
 	TArray<int> queue = { startRoomNumber, DEPTH_MARKER };
-	int pathLength = 0;
+	int pathLength = 1;
 
 	if (spawnRoomNumber == startRoomNumber) {
 		return 0;

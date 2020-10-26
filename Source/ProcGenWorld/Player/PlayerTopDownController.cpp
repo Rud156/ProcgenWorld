@@ -594,11 +594,14 @@ void APlayerTopDownController::HandlePlayerReachedPosition()
 	{
 		ATile* tile = _lastClickedTile;
 
+		_playerRoomRow = tile->GetRow();
+		_playerRoomColumn = tile->GetColumn();
+
 		ARoomGenerator* parentRoom = tile->GetTileParentRoom();
 		if (!parentRoom->IsRoomCleared())
 		{
 			SetCurrentRoom(parentRoom);
-			
+
 			_gameController->SetCurrentRoom(parentRoom);
 			_gameController->BeginGameTurn();
 		}

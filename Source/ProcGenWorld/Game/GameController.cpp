@@ -71,9 +71,9 @@ void AGameController::HandleRoomCleared()
 void AGameController::BeginGameTurn()
 {
 	_gameTurnActive = true;
-	_currentRoom->SpawnEnemies();
+	_currentRoom->CheckAndActivateRoom();
 	_playerTopDownController->DisableFreeMovement();
-	
+
 	BeginPlayerTurn();
 }
 
@@ -97,7 +97,9 @@ void AGameController::EndPlayerTurn()
 	_isPlayerTurn = false;
 	_currentTurnTime = AITurnWaitTime;
 
+	_currentRoom->ClearAllTilesStatus();
 	_playerTopDownController->DisablePlayerTurn();
+
 	ExecuteEnemyAI();
 }
 

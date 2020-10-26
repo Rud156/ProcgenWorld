@@ -22,7 +22,6 @@ void ATile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TileCenter = GetActorLocation() + TileCenterOffset;
 	_isMoveable = false;
 }
 
@@ -30,6 +29,7 @@ void ATile::BeginPlay()
 void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	TileCenter = GetActorLocation() + TileCenterOffset; // This needs to be the case since the ActorLocation is initially incorrect
 }
 
 void ATile::SetTileParent(ARoomGenerator* roomGenerator)

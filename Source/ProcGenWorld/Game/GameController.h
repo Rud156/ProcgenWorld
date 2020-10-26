@@ -53,6 +53,7 @@ public:
 
 	void SetPlayerTopDownController(APlayerTopDownController* playerTopDownController);
 	void SetCurrentRoom(ARoomGenerator* currentRoom);
+	UFUNCTION()
 	void HandleRoomCleared();
 
 	void BeginGameTurn();

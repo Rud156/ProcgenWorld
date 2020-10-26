@@ -460,6 +460,7 @@ void ARoomGenerator::CheckAndActivateRoom()
 	if (!_isRoomCleared)
 	{
 		SpawnEnemies();
+		SpawnRoomDoors();
 	}
 }
 
@@ -526,6 +527,8 @@ void ARoomGenerator::HandleEnemyDied(AEnemyControllerBase* enemy)
 	{
 		if (_roomEnemies[i] == enemy)
 		{
+			_roomEnemies[i]->Destroy();
+
 			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Enemy Killed");
 			_roomEnemies.RemoveAt(i);
 			break;

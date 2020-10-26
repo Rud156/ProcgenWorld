@@ -13,6 +13,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 APlayerTopDownController::APlayerTopDownController()
@@ -30,6 +31,16 @@ APlayerTopDownController::APlayerTopDownController()
 
 	EnemyPushDamage = 1;
 	EnemyPushManaCost = 3;
+
+	MinSpearRadius = 2;
+	MaxSpearRadius = 3;
+
+	MinDashRadius = 2;
+	MaxDashRadius = 3;
+	DashManaCost = 3;
+
+	DefaultMovementSpeed = 600;
+	DashMovementSpeed = 1200;
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +52,14 @@ void APlayerTopDownController::BeginPlay()
 	_currentMana = MaxMana;
 	_maxHP = MaxHealth;
 	_maxMana = MaxMana;
+
+	_minSpearRadius = MinSpearRadius;
+	_maxSpearRadius = MaxSpearRadius;
+
+	_minJumpRadius = MinDashRadius;
+	_maxJumpRadius = MaxDashRadius;
+
+	_playerHasSpear = true; // TODO: Change this later on...
 }
 
 // Called every frame
@@ -88,6 +107,7 @@ void APlayerTopDownController::HandleMouseClicked()
 				break;
 
 			case ActionType::Jump:
+				ExecuteDashAction(hitResult, tile);
 				break;
 
 			case ActionType::Attack:
@@ -95,9 +115,11 @@ void APlayerTopDownController::HandleMouseClicked()
 				break;
 
 			case ActionType::SpearThrow:
+				ExecuteSpearThrowAction(tile);
 				break;
 
 			case ActionType::Push:
+				ExecutePushAction(tile);
 				break;
 			}
 		}
@@ -171,7 +193,7 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile Clicked!!!");
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile For Movement!!!");
 	}
 }
 
@@ -197,7 +219,7 @@ void APlayerTopDownController::ExecutePushAction(ATile* tile)
 
 	if (!tile->IsTileMarked())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile Clicked!!!");
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile For Push!!!");
 		return;
 	}
 
@@ -507,6 +529,12 @@ void APlayerTopDownController::ExecutePushAction(ATile* tile)
 
 void APlayerTopDownController::ExecuteSpearThrowAction(ATile* tile)
 {
+	if (!tile->IsTileMarked() || !_playerHasSpear)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Spear Throw");
+		return;
+	}
+
 	int row = tile->GetRow();
 	int column = tile->GetColumn();
 
@@ -523,11 +551,41 @@ void APlayerTopDownController::ExecuteSpearThrowAction(ATile* tile)
 	_gameController->EndPlayerTurn();
 }
 
-void APlayerTopDownController::ExecuteJumpAction(ATile* tile)
+void APlayerTopDownController::ExecuteDashAction(FHitResult hitResult, ATile* tile)
 {
-	// TODO: Implement this function...
-}
+	if (!HasMana(DashManaCost))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Not Enough Mana");
+		return;
+	}
 
+	bool isTileMarked = tile->IsTileMarked();
+	auto worldStatus = _currentRoom->GetWorldState();
+
+	int row = tile->GetRow();
+	int column = tile->GetColumn();
+	auto tileData = worldStatus[row][column];
+
+	if (isTileMarked && tileData == WorldElementType::Floor) {
+		_playerCharacter->GetCharacterMovement()->MaxWalkSpeed = DashMovementSpeed;
+		bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
+
+		if (movementSuccess)
+		{
+			UseMana(DashManaCost);
+
+			_playerRoomRow = tile->GetRow();
+			_playerRoomColumn = tile->GetColumn();
+
+			_currentRoom->ClearAllTilesStatus();
+			_gameController->EndPlayerTurn();
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile For Jump!!!");
+	}
+}
 
 void APlayerTopDownController::SetDefaultProperties(APlayerCharacter* playerCharacter, AGameController* gameController)
 {
@@ -590,6 +648,8 @@ int APlayerTopDownController::GetPlayerColumn()
 
 void APlayerTopDownController::HandlePlayerReachedPosition()
 {
+	_playerCharacter->GetCharacterMovement()->MaxWalkSpeed = DefaultMovementSpeed;
+
 	if (_hasFreeMovement)
 	{
 		ATile* tile = _lastClickedTile;
@@ -601,6 +661,7 @@ void APlayerTopDownController::HandlePlayerReachedPosition()
 		if (!parentRoom->IsRoomCleared())
 		{
 			SetCurrentRoom(parentRoom);
+			ResetPlayerMana();
 
 			_gameController->SetCurrentRoom(parentRoom);
 			_gameController->BeginGameTurn();
@@ -748,12 +809,56 @@ void APlayerTopDownController::HandlePlayerAttackAction()
 
 void APlayerTopDownController::HandlePlayerSpearAction()
 {
-	// TODO: Implement this function...
+	int minTopLeftRow = _playerRoomRow - _minSpearRadius;
+	int minTopLeftColumn = _playerRoomColumn - _minSpearRadius;
+	int minBottomRightRow = _playerRoomRow + _minSpearRadius;
+	int minBottomRightColumn = _playerRoomColumn + _minSpearRadius;
+
+	int maxTopLeftRow = _playerRoomRow - _maxSpearRadius;
+	int maxTopLeftColumn = _playerRoomColumn - _maxSpearRadius;
+	int maxBottomRightRow = _playerRoomRow + _maxSpearRadius;
+	int maxBottomRightColumn = _playerRoomColumn + _maxSpearRadius;
+
+	for (int i = maxTopLeftRow; i <= maxBottomRightRow; i++)
+	{
+		for (int j = maxTopLeftColumn; j <= maxBottomRightColumn; j++)
+		{
+			if (((i <= minTopLeftRow || i >= minBottomRightRow) ||
+				(j <= minTopLeftColumn || j >= minBottomRightColumn)) &&
+				_currentRoom->IsPositionInRoom(i, j))
+			{
+				_currentRoom->MarkTile(i, j);
+			}
+		}
+	}
+
 	_lastPlayerAction = ActionType::SpearThrow;
 }
 
-void APlayerTopDownController::HandlePlayerJumpAction()
+void APlayerTopDownController::HandlePlayerDashAction()
 {
-	// TODO: Implement this function...
+	int minTopLeftRow = _playerRoomRow - _minJumpRadius;
+	int minTopLeftColumn = _playerRoomColumn - _minJumpRadius;
+	int minBottomRightRow = _playerRoomRow + _minJumpRadius;
+	int minBottomRightColumn = _playerRoomColumn + _minJumpRadius;
+
+	int maxTopLeftRow = _playerRoomRow - _maxJumpRadius;
+	int maxTopLeftColumn = _playerRoomColumn - _maxJumpRadius;
+	int maxBottomRightRow = _playerRoomRow + _maxJumpRadius;
+	int maxBottomRightColumn = _playerRoomColumn + _maxJumpRadius;
+
+	for (int i = maxTopLeftRow; i <= maxBottomRightRow; i++)
+	{
+		for (int j = maxTopLeftColumn; j <= maxBottomRightColumn; j++)
+		{
+			if (((i <= minTopLeftRow || i >= minBottomRightRow) ||
+				(j <= minTopLeftColumn || j >= minBottomRightColumn)) &&
+				_currentRoom->IsPositionInRoom(i, j))
+			{
+				_currentRoom->MarkTile(i, j);
+			}
+		}
+	}
+
 	_lastPlayerAction = ActionType::Jump;
 }

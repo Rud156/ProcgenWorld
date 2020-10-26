@@ -455,6 +455,17 @@ int ARoomGenerator::GetColumnCount()
 	return _columnCount;
 }
 
+bool ARoomGenerator::IsPositionInRoom(int row, int column)
+{
+	if (_floorMatrix.Contains(row) && _floorMatrix[row].Contains(column))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
 void ARoomGenerator::CheckAndActivateRoom()
 {
 	if (!_isRoomCleared)

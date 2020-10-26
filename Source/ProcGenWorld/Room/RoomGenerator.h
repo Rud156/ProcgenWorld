@@ -121,6 +121,7 @@ public:
 
 	int GetRowCount();
 	int GetColumnCount();
+	bool IsPositionInRoom(int row, int column);
 
 	void CheckAndActivateRoom();
 

@@ -20,7 +20,7 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
+		UPROPERTY(Category = Actor, VisibleDefaultsOnly)
 		class USceneComponent* TopDownSceneComponent;
 
 	AGameController* _gameController;
@@ -36,6 +36,12 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	int _maxMana;
 	int _currentMana;
 
+	int _minSpearRadius;
+	int _maxSpearRadius;
+
+	int _minJumpRadius;
+	int _maxJumpRadius;
+
 	int _playerRoomRow;
 	int _playerRoomColumn;
 
@@ -50,7 +56,7 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	void ExecuteAttackTileAction(ATile* tile);
 	void ExecutePushAction(ATile* tile);
 	void ExecuteSpearThrowAction(ATile* tile);
-	void ExecuteJumpAction(ATile* tile);
+	void ExecuteDashAction(FHitResult hitResult, ATile* tile);
 
 protected:
 	virtual void BeginPlay() override;
@@ -67,6 +73,27 @@ public:
 
 	UPROPERTY(Category = PlayerStats, EditAnywhere)
 		float MaxMana;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float MinSpearRadius;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float MaxSpearRadius;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float MinDashRadius;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float MaxDashRadius;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		int DashManaCost;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float DefaultMovementSpeed;
+
+	UPROPERTY(Category = PlayerStats, EditAnywhere)
+		float DashMovementSpeed;
 
 	UPROPERTY(Category = PlayerStats, EditAnywhere)
 		float MeleeDamageAmount;
@@ -138,5 +165,5 @@ public:
 		void HandlePlayerAttackAction();
 
 	UFUNCTION(Category = Actions, BlueprintCallable)
-		void HandlePlayerJumpAction();
+		void HandlePlayerDashAction();
 };

@@ -20,12 +20,13 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
 	GENERATED_BODY()
 
-		UPROPERTY(Category = Actor, VisibleDefaultsOnly)
+	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
 		class USceneComponent* TopDownSceneComponent;
 
 	AGameController* _gameController;
 	APlayerCharacter* _playerCharacter;
 	ARoomGenerator* _currentRoom;
+	ATile* _lastClickedTile;
 
 	bool _playerHasSpear;
 	ActionType _lastPlayerAction;
@@ -38,6 +39,7 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	int _playerRoomRow;
 	int _playerRoomColumn;
 
+	bool _hasFreeMovement;
 	bool _isPlayerTurn;
 
 	void HandleMouseClicked();
@@ -93,9 +95,13 @@ public:
 	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
 		bool GetIsPlayerTurn();
 
+	void EnableFreeMovement();
+	void DisableFreeMovement();
+
 	ARoomGenerator* GetRoomInstance();
 	int GetPlayerRow();
 	int GetPlayerColumn();
+	void HandlePlayerReachedPosition();
 
 	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
 		int GetPlayerHealth();

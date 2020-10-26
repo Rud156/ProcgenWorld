@@ -37,6 +37,11 @@ void ATile::SetTileParent(ARoomGenerator* roomGenerator)
 	_roomParent = roomGenerator;
 }
 
+ARoomGenerator* ATile::GetTileParentRoom()
+{
+	return  _roomParent;
+}
+
 void ATile::SetPositionInRoom(int row, int column)
 {
 	_row = row;

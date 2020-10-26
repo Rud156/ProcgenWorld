@@ -12,6 +12,7 @@ class ATile;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FJumpDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLandDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMoveDelegate, FVector, TargetLocation);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerReachedPosition);
 
 UCLASS()
 class PROCGENWORLD_API APlayerCharacter : public ACharacter
@@ -96,6 +97,9 @@ public:
 	UPROPERTY(Category = Delegates, BlueprintAssignable)
 		FMoveDelegate OnPlayerMoved;
 
+	UPROPERTY(Category = Delegates, BlueprintAssignable)
+		FPlayerReachedPosition OnPlayerReachedPosition;
+
 #pragma endregion
 
 #pragma region External Movement
@@ -106,6 +110,8 @@ public:
 	void MoveRight();
 
 	bool MoveToTilePosition(FHitResult hitResult, ATile* tile);
+	UFUNCTION(Category = AI, BlueprintCallable)
+		void HandlePlayerReachedPosition();
 
 #pragma endregion
 

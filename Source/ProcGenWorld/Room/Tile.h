@@ -48,6 +48,7 @@ public:
 		void SetTileUnMarkedMaterial(UMaterialInstance* defaultMaterial);
 
 	void SetTileParent(ARoomGenerator* roomGenerator);
+	ARoomGenerator* GetTileParentRoom();
 	void SetPositionInRoom(int row, int column);
 
 	bool IsTileMarked();

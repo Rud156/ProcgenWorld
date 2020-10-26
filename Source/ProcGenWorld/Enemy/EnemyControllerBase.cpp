@@ -86,7 +86,7 @@ void AEnemyControllerBase::TakeDamage(int damageAmount)
 
 void AEnemyControllerBase::HandleUnitDied()
 {
-	_parentRoom->HandleUnitDied(this);
+	_parentRoom->HandleEnemyDied(this);
 }
 
 void AEnemyControllerBase::Execute()

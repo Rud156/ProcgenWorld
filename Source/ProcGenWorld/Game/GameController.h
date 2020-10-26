@@ -20,6 +20,7 @@ class PROCGENWORLD_API AGameController : public AActor
 	APlayerTopDownController* _playerTopDownController;
 	ARoomGenerator* _currentRoom;
 
+	bool _gameTurnActive;
 	bool _isPlayerTurn;
 	float _currentTurnTime;
 
@@ -52,9 +53,10 @@ public:
 
 	void SetPlayerTopDownController(APlayerTopDownController* playerTopDownController);
 	void SetCurrentRoom(ARoomGenerator* currentRoom);
+	void HandleRoomCleared();
 
-	void BeginGame();
-	void EndGame(bool winStatus);
+	void BeginGameTurn();
+	void EndGameTurn();
 
 protected:
 	// Called when the game starts or when spawned

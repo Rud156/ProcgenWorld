@@ -29,6 +29,11 @@ void AGameController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!_gameTurnActive)
+	{
+		return;
+	}
+
 	if (_currentTurnTime > 0)
 	{
 		_currentTurnTime -= DeltaTime;
@@ -54,16 +59,29 @@ void AGameController::SetPlayerTopDownController(APlayerTopDownController* playe
 void AGameController::SetCurrentRoom(ARoomGenerator* currentRoom)
 {
 	_currentRoom = currentRoom;
+	_currentRoom->OnRoomCleared.AddDynamic(this, &AGameController::HandleRoomCleared);
 }
 
-void AGameController::BeginGame()
+void AGameController::HandleRoomCleared()
 {
-	// TODO: Implement this function...
+	_currentRoom->OnRoomCleared.RemoveDynamic(this, &AGameController::HandleRoomCleared);
+	EndGameTurn();
 }
 
-void AGameController::EndGame(bool winStatus)
+void AGameController::BeginGameTurn()
 {
-	// TODO: Implement this function...
+	_gameTurnActive = true;
+	_currentRoom->SpawnEnemies();
+	_playerTopDownController->DisableFreeMovement();
+	
+	BeginPlayerTurn();
+}
+
+void AGameController::EndGameTurn()
+{
+	_gameTurnActive = false;
+	_playerTopDownController->DisablePlayerTurn();
+	_playerTopDownController->EnableFreeMovement();
 }
 
 void AGameController::BeginPlayerTurn()

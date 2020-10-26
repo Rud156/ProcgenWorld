@@ -122,6 +122,7 @@ void APlayerSpawn::SpawnPlayer()
 
 	_gameController->SetPlayerTopDownController(_playerTopDownController);
 	_gameController->SetCurrentRoom(spawnRoom);
+	_gameController->BeginGameTurn();
 	_dungeonGen->SetPlayerController(_playerTopDownController);
 
 	OnPlayerSpawnComplete.Broadcast(_playerCharacter);

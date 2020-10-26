@@ -262,27 +262,6 @@ void ARoomGenerator::RenderRoomEdges(FVector startPosition)
 	}
 }
 
-void ARoomGenerator::HandleUnitDied(AEnemyControllerBase* enemy)
-{
-	for (int i = 0; i < _roomEnemies.Num(); i++)
-	{
-		if (_roomEnemies[i] == enemy)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Enemy Killed");
-			_roomEnemies.RemoveAt(i);
-			break;
-		}
-	}
-
-	if (_roomEnemies.Num() <= 0)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Room Cleared");
-
-		SetRoomCleared();
-		DestroyRoomDoors();
-	}
-}
-
 ATile* ARoomGenerator::GetRandomTileInRoom(int& row, int& column)
 {
 	int randomRow = FMath::RandRange(0, _rowCount - 2);
@@ -476,6 +455,14 @@ int ARoomGenerator::GetColumnCount()
 	return _columnCount;
 }
 
+void ARoomGenerator::CheckAndActivateRoom()
+{
+	if(!_isRoomCleared)
+	{
+		SpawnEnemies();
+	}
+}
+
 void ARoomGenerator::SetPlayerController(APlayerTopDownController* playerController)
 {
 	_playerController = playerController;
@@ -527,6 +514,29 @@ void ARoomGenerator::ClearAllEnemies()
 	for (int i = 0; i < _roomEnemies.Num(); i++)
 	{
 		_roomEnemies[i]->TakeDamage(_roomEnemies[i]->GetMaxHealth());
+	}
+}
+
+void ARoomGenerator::HandleEnemyDied(AEnemyControllerBase* enemy)
+{
+	for (int i = 0; i < _roomEnemies.Num(); i++)
+	{
+		if (_roomEnemies[i] == enemy)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Enemy Killed");
+			_roomEnemies.RemoveAt(i);
+			break;
+		}
+	}
+
+	if (_roomEnemies.Num() <= 0)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Room Cleared");
+
+		SetRoomCleared();
+		DestroyRoomDoors();
+
+		OnRoomCleared.Broadcast();
 	}
 }
 

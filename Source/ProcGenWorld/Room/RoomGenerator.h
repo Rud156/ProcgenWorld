@@ -13,6 +13,8 @@ class ATile;
 class AEnemyControllerBase;
 class APlayerTopDownController;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRoomCleared);
+
 UCLASS()
 class PROCGENWORLD_API ARoomGenerator : public AActor
 {
@@ -89,14 +91,15 @@ public:
 	UPROPERTY(Category = WallMovement, EditAnywhere)
 		float LerpSpeed;
 
+	UPROPERTY(Category = Delegates, BlueprintAssignable)
+		FRoomCleared OnRoomCleared;
+
 #pragma endregion
 
 	ARoomGenerator();
 	virtual void Tick(float DeltaTime) override;
 
 	void LoadRoomFromFile(FString roomName, FVector startPosition);
-
-	void HandleUnitDied(AEnemyControllerBase* enemy);
 
 	ATile* GetRandomTileInRoom(int& row, int& column);
 	ATile* GetTileAtPosition(int row, int column);
@@ -119,9 +122,12 @@ public:
 	int GetRowCount();
 	int GetColumnCount();
 
+	void CheckAndActivateRoom();
+
 	void SetPlayerController(APlayerTopDownController* playerController);
 	void SpawnEnemies();
 	void ClearAllEnemies();
+	void HandleEnemyDied(AEnemyControllerBase* enemy);
 	TArray<AEnemyControllerBase*> GetEnemies();
 
 	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)

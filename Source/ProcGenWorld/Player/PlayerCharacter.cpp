@@ -213,4 +213,9 @@ bool APlayerCharacter::MoveToTilePosition(FHitResult hitResult, ATile* tile)
 	}
 }
 
+void APlayerCharacter::HandlePlayerReachedPosition()
+{
+	OnPlayerReachedPosition.Broadcast();
+}
+
 #pragma endregion

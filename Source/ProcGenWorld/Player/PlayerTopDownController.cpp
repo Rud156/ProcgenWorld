@@ -67,12 +67,6 @@ void APlayerTopDownController::SetupPlayerInputComponent(UInputComponent* Player
 
 void APlayerTopDownController::HandleMouseClicked()
 {
-	if (!_isPlayerTurn)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Not Player's Turn");
-		return;
-	}
-
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Mouse Clicked");
 	APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
@@ -83,24 +77,33 @@ void APlayerTopDownController::HandleMouseClicked()
 	ATile* tile = Cast<ATile>(hitActor);
 
 	if (tile != nullptr) {
-		switch (_lastPlayerAction)
+		_lastClickedTile = tile;
+
+		if (_isPlayerTurn)
 		{
-		case ActionType::Move:
-			ExecuteMoveToTileAction(hitResult, tile);
-			break;
+			switch (_lastPlayerAction)
+			{
+			case ActionType::Move:
+				ExecuteMoveToTileAction(hitResult, tile);
+				break;
 
-		case ActionType::Jump:
-			break;
+			case ActionType::Jump:
+				break;
 
-		case ActionType::Attack:
-			ExecuteAttackTileAction(tile);
-			break;
+			case ActionType::Attack:
+				ExecuteAttackTileAction(tile);
+				break;
 
-		case ActionType::SpearThrow:
-			break;
+			case ActionType::SpearThrow:
+				break;
 
-		case ActionType::Push:
-			break;
+			case ActionType::Push:
+				break;
+			}
+		}
+		else if (_hasFreeMovement)
+		{
+			_playerCharacter->MoveToTilePosition(hitResult, tile);
 		}
 	}
 	else {
@@ -118,7 +121,7 @@ void APlayerTopDownController::Handle1Pressed()
 
 void APlayerTopDownController::Handle2Pressed()
 {
-	if(_currentRoom != nullptr)
+	if (_currentRoom != nullptr)
 	{
 		_currentRoom->ClearAllEnemies();
 	}
@@ -530,6 +533,8 @@ void APlayerTopDownController::SetDefaultProperties(APlayerCharacter* playerChar
 {
 	_playerCharacter = playerCharacter;
 	_gameController = gameController;
+
+	_playerCharacter->OnPlayerReachedPosition.AddDynamic(this, &APlayerTopDownController::HandlePlayerReachedPosition);
 }
 
 void APlayerTopDownController::SetCurrentRoom(ARoomGenerator* roomGenerator)
@@ -558,6 +563,16 @@ bool APlayerTopDownController::GetIsPlayerTurn()
 	return _isPlayerTurn;
 }
 
+void APlayerTopDownController::EnableFreeMovement()
+{
+	_hasFreeMovement = true;
+}
+
+void APlayerTopDownController::DisableFreeMovement()
+{
+	_hasFreeMovement = false;
+}
+
 ARoomGenerator* APlayerTopDownController::GetRoomInstance()
 {
 	return _currentRoom;
@@ -571,6 +586,23 @@ int APlayerTopDownController::GetPlayerRow()
 int APlayerTopDownController::GetPlayerColumn()
 {
 	return _playerRoomColumn;
+}
+
+void APlayerTopDownController::HandlePlayerReachedPosition()
+{
+	if (_hasFreeMovement)
+	{
+		ATile* tile = _lastClickedTile;
+
+		ARoomGenerator* parentRoom = tile->GetTileParentRoom();
+		if (!parentRoom->IsRoomCleared())
+		{
+			SetCurrentRoom(parentRoom);
+			
+			_gameController->SetCurrentRoom(parentRoom);
+			_gameController->BeginGameTurn();
+		}
+	}
 }
 
 int APlayerTopDownController::GetPlayerHealth()

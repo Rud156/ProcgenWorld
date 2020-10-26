@@ -457,7 +457,7 @@ int ARoomGenerator::GetColumnCount()
 
 void ARoomGenerator::CheckAndActivateRoom()
 {
-	if(!_isRoomCleared)
+	if (!_isRoomCleared)
 	{
 		SpawnEnemies();
 	}
@@ -493,7 +493,7 @@ void ARoomGenerator::SpawnEnemies()
 
 	emptyPositions.Sort([this](const TPair<int, int> Item1, const TPair<int, int> Item2)
 		{
-			return FMath::Rand() <= 0.5f;
+			return FMath::FRand() <= 0.5f;
 		});
 
 	for (int i = 0; i < _roomDepth + 1; i++)
@@ -501,9 +501,12 @@ void ARoomGenerator::SpawnEnemies()
 		auto tileIndex = emptyPositions[i];
 		ATile* tile = _floorMatrix[tileIndex.Key][tileIndex.Value];
 
-		auto randomEnemyIndex = FMath::FloorToInt(FMath::Rand() * Enemies.Num());
+		auto randomEnemyIndex = FMath::FloorToInt(FMath::FRand() * Enemies.Num());
 		auto enemyActor = GetWorld()->SpawnActor(Enemies[randomEnemyIndex], &tile->TileCenter, &FRotator::ZeroRotator);
 		auto enemyInstance = Cast<AEnemyControllerBase>(enemyActor);
+
+		enemyInstance->SetSpawnPosition(tileIndex.Key, tileIndex.Value);
+		enemyInstance->SetParentRoom(this);
 
 		_roomEnemies.Add(enemyInstance);
 	}
@@ -547,6 +550,11 @@ TArray<AEnemyControllerBase*> ARoomGenerator::GetEnemies()
 
 bool ARoomGenerator::IsPlayerInRoom()
 {
+	if (_playerController == nullptr)
+	{
+		return false;
+	}
+
 	return  _playerController->GetRoomInstance() == this;
 }
 

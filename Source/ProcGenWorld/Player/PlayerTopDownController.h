@@ -8,6 +8,7 @@
 #include "PlayerTopDownController.generated.h"
 
 class APlayerCharacter;
+class AUpgradeController;
 class ARoomGenerator;
 class APlayerSpawn;
 class AGameController;
@@ -20,10 +21,12 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
 	GENERATED_BODY()
 
-		UPROPERTY(Category = Actor, VisibleDefaultsOnly)
+	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
 		class USceneComponent* TopDownSceneComponent;
 
 	AGameController* _gameController;
+	AUpgradeController* _upgradeController;
+	
 	APlayerCharacter* _playerCharacter;
 	ARoomGenerator* _currentRoom;
 	ATile* _lastClickedTile;
@@ -67,6 +70,9 @@ public:
 
 	UPROPERTY(Category = Position, EditAnywhere)
 		FVector FollowOffset;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		TSubclassOf<class AUpgradeController> UpgradeController;
 
 	UPROPERTY(Category = PlayerStats, EditAnywhere)
 		float MaxHealth;
@@ -151,6 +157,8 @@ public:
 	void IncreasePlayerMana(int amount);
 	bool HasMana(int manaAmount);
 	void UseMana(int manaAmount);
+
+	void ApplyUpgrade(UpgradeType upgradeType);
 
 	UFUNCTION(Category = Actions, BlueprintCallable)
 		void HandlePlayerMoveAction();

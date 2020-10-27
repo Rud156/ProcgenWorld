@@ -387,7 +387,7 @@ TMap<int, TMap<int, WorldElementType>> ARoomGenerator::GetWorldState()
 			{
 				worldState[i].Add(j, WorldElementType::Enemy);
 			}
-			else if (tile != nullptr && tile->TileType == TileType::LavaTile)
+			else if (tile != nullptr && tile->GetTileType() == TileType::LavaTile)
 			{
 				worldState[i].Add(j, WorldElementType::LavaTile);
 			}
@@ -404,6 +404,22 @@ TMap<int, TMap<int, WorldElementType>> ARoomGenerator::GetWorldState()
 FString ARoomGenerator::GetRoomName()
 {
 	return _roomName;
+}
+
+void ARoomGenerator::SetRoomRowAndColumn(int row, int column)
+{
+	_roomRow = row;
+	_roomColumn = column;
+}
+
+int ARoomGenerator::GetRoomRow()
+{
+	return  _roomRow;
+}
+
+int ARoomGenerator::GetRoomColumn()
+{
+	return  _roomColumn;
 }
 
 FVector ARoomGenerator::GetStartPosition()
@@ -470,6 +486,7 @@ void ARoomGenerator::CheckAndActivateRoom()
 {
 	if (!_isRoomCleared)
 	{
+		SpawnRoomTiles();
 		SpawnEnemies();
 		SpawnRoomDoors();
 	}
@@ -619,6 +636,71 @@ void ARoomGenerator::DestroyRoomDoors()
 
 	_doors.Empty();
 }
+
+void ARoomGenerator::SpawnRoomTiles()
+{
+	auto worldState = GetWorldState();
+	TArray<TPair<int, int>> emptyPositions = TArray<TPair<int, int>>();
+
+	for (int i = 0; i < _rowCount - 1; i++)
+	{
+		for (int j = 0; j <= _columnCount; j++)
+		{
+			auto element = worldState[i][j];
+			if (element == WorldElementType::Floor)
+			{
+				TPair<int, int> position = TPair<int, int>();
+				position.Key = i;
+				position.Value = j;
+
+				emptyPositions.Add(position);
+			}
+		}
+	}
+
+	emptyPositions.Sort([this](const TPair<int, int> Item1, const TPair<int, int> Item2)
+		{
+			return FMath::FRand() <= 0.5f;
+		});
+
+	int randomNumber = FMath::RandRange(3, 5);
+	for (int i = 0; i < emptyPositions.Num(); i++)
+	{
+		if (i > randomNumber)
+		{
+			break;
+		}
+
+		auto position = emptyPositions[i];
+		ATile* tile = _floorMatrix[position.Key][position.Value];
+
+		int randomTileType = FMath::RandRange(0, 2);
+		switch (randomTileType)
+		{
+		case 0:
+			tile->SetTileType(TileType::LavaTile);
+			break;
+
+		case 1:
+			tile->SetTileType(TileType::UpgradeTile);
+			break;
+
+		case 2:
+			tile->SetPickupType(PickupType::Spear);
+			break;
+		}
+	}
+}
+
+void ARoomGenerator::ClearRoomTiles()
+{
+	for (int i = 0; i < _floorTiles.Num(); i++)
+	{
+		_floorTiles[i]->SetTileType(TileType::FloorTile);
+		_floorTiles[i]->SetPickupType(PickupType::None);
+	}
+}
+
 
 int ARoomGenerator::GetRoomDepth()
 {

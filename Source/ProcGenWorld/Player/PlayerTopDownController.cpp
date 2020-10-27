@@ -4,6 +4,7 @@
 #include "PlayerTopDownController.h"
 #include "PlayerCharacter.h"
 #include "PlayerSpawn.h"
+#include "UpgradeController.h"
 #include "../Enemy/EnemyControllerBase.h"
 #include "../Room/Tile.h"
 #include "../Room/RoomGenerator.h"
@@ -59,7 +60,8 @@ void APlayerTopDownController::BeginPlay()
 	_minJumpRadius = MinDashRadius;
 	_maxJumpRadius = MaxDashRadius;
 
-	_playerHasSpear = true; // TODO: Change this later on...
+	auto upgradeActor = GetWorld()->SpawnActor(UpgradeController, &FVector::ZeroVector, &FRotator::ZeroRotator);
+	_upgradeController = Cast<AUpgradeController>(upgradeActor);
 }
 
 // Called every frame
@@ -163,6 +165,12 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 
 		if (movementSuccess)
 		{
+			if (tile->GetPickupType() == PickupType::Spear) // TODO: Change this later on...
+			{
+				tile->SetPickupType(PickupType::None);
+				_playerHasSpear = true;
+			}
+
 			_playerRoomRow = tile->GetRow();
 			_playerRoomColumn = tile->GetColumn();
 
@@ -183,6 +191,12 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 			bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
 			if (movementSuccess)
 			{
+				if (tile->GetPickupType() == PickupType::Spear) // TODO: Change this later on...
+				{
+					tile->SetPickupType(PickupType::None);
+					_playerHasSpear = true;
+				}
+
 				_playerRoomRow = tile->GetRow();
 				_playerRoomColumn = tile->GetColumn();
 
@@ -574,6 +588,12 @@ void APlayerTopDownController::ExecuteDashAction(FHitResult hitResult, ATile* ti
 		{
 			UseMana(DashManaCost);
 
+			if (tile->GetPickupType() == PickupType::Spear) // TODO: Change this later on...
+			{
+				tile->SetPickupType(PickupType::None);
+				_playerHasSpear = true;
+			}
+
 			_playerRoomRow = tile->GetRow();
 			_playerRoomColumn = tile->GetColumn();
 
@@ -614,6 +634,7 @@ void APlayerTopDownController::EnablePlayerTurn()
 void APlayerTopDownController::DisablePlayerTurn()
 {
 	_isPlayerTurn = false;
+	_upgradeController->ClearUpgradesUI();
 }
 
 bool APlayerTopDownController::GetIsPlayerTurn()
@@ -656,6 +677,8 @@ void APlayerTopDownController::HandlePlayerReachedPosition()
 
 		_playerRoomRow = tile->GetRow();
 		_playerRoomColumn = tile->GetColumn();
+
+		auto tileParent = tile->GetTileParentRoom();
 
 		ARoomGenerator* parentRoom = tile->GetTileParentRoom();
 		if (!parentRoom->IsRoomCleared())
@@ -731,6 +754,35 @@ bool APlayerTopDownController::HasMana(int manaAmount)
 void APlayerTopDownController::UseMana(int manaAmount)
 {
 	_currentMana -= manaAmount;
+}
+
+void APlayerTopDownController::ApplyUpgrade(UpgradeType upgradeType)
+{
+	switch (upgradeType)
+	{
+	case UpgradeType::RestoreHP:
+		ResetPlayerHealth();
+		break;
+
+	case UpgradeType::IncreaseHP:
+		_maxHP += 1;
+		break;
+
+	case UpgradeType::IncreaseMana:
+		_maxMana += 1;
+		break;
+
+	case UpgradeType::IncreaseJump:
+		_maxJumpRadius += 1;
+		break;
+
+	case UpgradeType::IncreaseSpear:
+		_maxSpearRadius += 1;
+		break;
+
+	default:
+		break;
+	}
 }
 
 void APlayerTopDownController::HandlePlayerMoveAction()

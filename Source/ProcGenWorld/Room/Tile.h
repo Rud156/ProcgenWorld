@@ -15,11 +15,15 @@ class PROCGENWORLD_API ATile : public AActor
 	GENERATED_BODY()
 
 	ARoomGenerator* _roomParent;
-	PickupType _pickupType;
 	bool _isMoveable;
+
+	PickupType _pickupType;
+	AActor* _pickupItem;
 
 	int _row;
 	int _column;
+
+	TileType _tileType;
 
 public:
 #pragma region Properties
@@ -30,11 +34,11 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		FVector TileCenter;
 
-	UPROPERTY(Category = TileData, EditAnywhere)
-		TileType TileType;
-
 	UPROPERTY(Category = Positions, EditAnywhere)
 		FVector TileCenterOffset;
+
+	UPROPERTY(Category = Pickups, EditAnywhere)
+		TSubclassOf<class AActor> SpearPickup;
 
 #pragma endregion
 
@@ -57,6 +61,9 @@ public:
 
 	int GetRow();
 	int GetColumn();
+
+	void SetTileType(TileType tileType);
+	TileType GetTileType();
 
 	void SetPickupType(PickupType pickupType);
 	PickupType GetPickupType();

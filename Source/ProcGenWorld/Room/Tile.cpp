@@ -15,6 +15,7 @@ ATile::ATile()
 
 	TileCenterOffset = FVector(100, 100, 0);
 	_pickupType = PickupType::None;
+	_tileType = TileType::FloorTile;
 }
 
 // Called when the game starts or when spawned
@@ -76,9 +77,29 @@ int ATile::GetColumn()
 	return  _column;
 }
 
+void ATile::SetTileType(TileType tileType)
+{
+	_tileType = tileType;
+}
+
+TileType ATile::GetTileType()
+{
+	return  _tileType;
+}
+
 void ATile::SetPickupType(PickupType pickupType)
 {
+	if (_pickupItem != nullptr)
+	{
+		_pickupItem->Destroy();
+	}
+
 	_pickupType = pickupType;
+	if (_pickupType == PickupType::Spear)
+	{
+		auto pickupItem = GetWorld()->SpawnActor(SpearPickup, &TileCenter, &FRotator::ZeroRotator);
+		_pickupItem = pickupItem;
+	}
 }
 
 PickupType ATile::GetPickupType()

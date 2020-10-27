@@ -21,6 +21,9 @@ class PROCGENWORLD_API ARoomGenerator : public AActor
 	GENERATED_BODY()
 
 private:
+	int _roomRow;
+	int _roomColumn;
+	
 	int _rowCount;
 	int _columnCount;
 	TMap<int, TMap<int, FWindowsPlatformTypes::TCHAR>> _room;
@@ -88,6 +91,15 @@ public:
 	UPROPERTY(Category = Display, EditAnywhere)
 		UMaterialInstance* TileMarkerMaterial;
 
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* UpgradeMaterial;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* VictoryMaterial;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* LavaMaterial;
+
 	UPROPERTY(Category = WallMovement, EditAnywhere)
 		float LerpSpeed;
 
@@ -111,6 +123,9 @@ public:
 	TMap<int, TMap<int, WorldElementType>> GetWorldState();
 
 	FString GetRoomName();
+	void SetRoomRowAndColumn(int row, int column);
+	int GetRoomRow();
+	int GetRoomColumn();
 	FVector GetStartPosition();
 	void UpdateRoomPosition(FVector offset);
 
@@ -140,6 +155,9 @@ public:
 
 	void SpawnRoomDoors();
 	void DestroyRoomDoors();
+
+	void SpawnRoomTiles();
+	void ClearRoomTiles();
 
 	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
 		int GetRoomDepth();

@@ -20,7 +20,8 @@ enum class UpgradeType : uint8
 	RestoreHP,
 	IncreaseHP,
 	IncreaseMana,
-	IncreaseJump
+	IncreaseJump,
+	IncreaseSpear
 };
 
 UENUM(BlueprintType)
@@ -31,8 +32,7 @@ enum class TileType : uint8
 	ExitTile,
 	WallTile,
 	VictoryTile,
-	UpgradeTile,
-	PickupTile
+	UpgradeTile
 };
 
 UENUM(BlueprintType)

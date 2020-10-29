@@ -29,9 +29,11 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	
 	APlayerCharacter* _playerCharacter;
 	ARoomGenerator* _currentRoom;
+	
 	ATile* _lastClickedTile;
+	AActor* _hoverDisplayTile;
 
-	bool _playerHasSpear;
+	TMap<PickupType, int> _playerPickups;
 	ActionType _lastPlayerAction;
 
 	int _maxHP;
@@ -61,6 +63,8 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	void ExecuteSpearThrowAction(ATile* tile);
 	void ExecuteDashAction(FHitResult hitResult, ATile* tile);
 
+	void UpdateHoverDisplayTile();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -73,6 +77,15 @@ public:
 
 	UPROPERTY(Category = Display, EditAnywhere)
 		TSubclassOf<class AUpgradeController> UpgradeController;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		FVector HoverDisplayOffset;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		FVector HoverDisplayDefaultPosition;
+	
+	UPROPERTY(Category = Display, EditAnywhere)
+		TSubclassOf<class AActor> HoverDisplayPrefab;
 
 	UPROPERTY(Category = PlayerStats, EditAnywhere)
 		float MaxHealth;
@@ -159,6 +172,12 @@ public:
 	void UseMana(int manaAmount);
 
 	void ApplyUpgrade(UpgradeType upgradeType);
+	
+	void CollectPickup(PickupType pickupType, int count = 1);
+	void UsePickup(PickupType pickupType);
+	bool HasPickup(PickupType pickupType);
+	UFUNCTION(Category = Pickups, BlueprintCallable, BlueprintPure)
+		TMap<PickupType, int> GetPickups();
 
 	UFUNCTION(Category = Actions, BlueprintCallable)
 		void HandlePlayerMoveAction();

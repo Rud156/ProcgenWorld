@@ -481,7 +481,6 @@ bool ARoomGenerator::IsPositionInRoom(int row, int column)
 	return false;
 }
 
-
 void ARoomGenerator::CheckAndActivateRoom()
 {
 	if (!_isRoomCleared)

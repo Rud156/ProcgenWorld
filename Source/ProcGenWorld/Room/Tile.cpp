@@ -102,6 +102,11 @@ void ATile::SetPickupType(PickupType pickupType)
 	}
 }
 
+void ATile::ClearPickup()
+{
+	SetPickupType(PickupType::None);
+}
+
 PickupType ATile::GetPickupType()
 {
 	return  _pickupType;

@@ -66,6 +66,7 @@ public:
 	TileType GetTileType();
 
 	void SetPickupType(PickupType pickupType);
+	void ClearPickup();
 	PickupType GetPickupType();
 
 protected:

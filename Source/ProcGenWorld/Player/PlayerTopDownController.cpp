@@ -60,8 +60,12 @@ void APlayerTopDownController::BeginPlay()
 	_minJumpRadius = MinDashRadius;
 	_maxJumpRadius = MaxDashRadius;
 
+	_playerPickups = TMap<PickupType, int>();
+
 	auto upgradeActor = GetWorld()->SpawnActor(UpgradeController, &FVector::ZeroVector, &FRotator::ZeroRotator);
 	_upgradeController = Cast<AUpgradeController>(upgradeActor);
+
+	_hoverDisplayTile = GetWorld()->SpawnActor(HoverDisplayPrefab, &FVector::ZeroVector, &FRotator::ZeroRotator);
 }
 
 // Called every frame
@@ -73,6 +77,8 @@ void APlayerTopDownController::Tick(float DeltaTime)
 		FVector targetLocation = _playerCharacter->GetActorLocation() + FollowOffset;
 		SetActorLocation(targetLocation);
 	}
+
+	UpdateHoverDisplayTile();
 }
 
 // Called to bind functionality to input
@@ -165,11 +171,8 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 
 		if (movementSuccess)
 		{
-			if (tile->GetPickupType() == PickupType::Spear) // TODO: Change this later on...
-			{
-				tile->SetPickupType(PickupType::None);
-				_playerHasSpear = true;
-			}
+			CollectPickup(tile->GetPickupType());
+			tile->ClearPickup();
 
 			_playerRoomRow = tile->GetRow();
 			_playerRoomColumn = tile->GetColumn();
@@ -180,7 +183,7 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 	}
 	else if (isTileMarked && tileData == WorldElementType::Enemy)
 	{
-		if (_playerHasSpear)
+		if (HasPickup(PickupType::Spear))
 		{
 			auto enemy = _currentRoom->GetEnemyAtPosition(row, column);
 			if (enemy != nullptr)
@@ -191,11 +194,8 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 			bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
 			if (movementSuccess)
 			{
-				if (tile->GetPickupType() == PickupType::Spear) // TODO: Change this later on...
-				{
-					tile->SetPickupType(PickupType::None);
-					_playerHasSpear = true;
-				}
+				CollectPickup(tile->GetPickupType());
+				tile->ClearPickup();
 
 				_playerRoomRow = tile->GetRow();
 				_playerRoomColumn = tile->GetColumn();
@@ -543,7 +543,7 @@ void APlayerTopDownController::ExecutePushAction(ATile* tile)
 
 void APlayerTopDownController::ExecuteSpearThrowAction(ATile* tile)
 {
-	if (!tile->IsTileMarked() || !_playerHasSpear)
+	if (!tile->IsTileMarked() || !HasPickup(PickupType::Spear))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Spear Throw");
 		return;
@@ -556,8 +556,8 @@ void APlayerTopDownController::ExecuteSpearThrowAction(ATile* tile)
 	if (enemy != nullptr)
 	{
 		enemy->TakeDamage(enemy->GetMaxHealth());
-		_playerHasSpear = false;
 
+		UsePickup(PickupType::Spear);
 		tile->SetPickupType(PickupType::Spear);
 	}
 
@@ -588,11 +588,8 @@ void APlayerTopDownController::ExecuteDashAction(FHitResult hitResult, ATile* ti
 		{
 			UseMana(DashManaCost);
 
-			if (tile->GetPickupType() == PickupType::Spear) // TODO: Change this later on...
-			{
-				tile->SetPickupType(PickupType::None);
-				_playerHasSpear = true;
-			}
+			CollectPickup(tile->GetPickupType());
+			tile->ClearPickup();
 
 			_playerRoomRow = tile->GetRow();
 			_playerRoomColumn = tile->GetColumn();
@@ -604,6 +601,29 @@ void APlayerTopDownController::ExecuteDashAction(FHitResult hitResult, ATile* ti
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile For Jump!!!");
+	}
+}
+
+void APlayerTopDownController::UpdateHoverDisplayTile()
+{
+	if (_hoverDisplayTile != nullptr)
+	{
+		APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+		FHitResult hitResult;
+		playerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, hitResult);
+
+		auto hitActor = hitResult.GetActor();
+		ATile* tile = Cast<ATile>(hitActor);
+
+		if (tile != nullptr)
+		{
+			_hoverDisplayTile->SetActorLocation(tile->TileCenter + HoverDisplayOffset);
+		}
+		else
+		{
+			_hoverDisplayTile->SetActorLocation(HoverDisplayDefaultPosition);
+		}
 	}
 }
 
@@ -783,6 +803,51 @@ void APlayerTopDownController::ApplyUpgrade(UpgradeType upgradeType)
 	default:
 		break;
 	}
+}
+
+void APlayerTopDownController::CollectPickup(PickupType pickupType, int count)
+{
+	int currentCount = 0;
+	if (_playerPickups.Contains(pickupType))
+	{
+		currentCount = _playerPickups[pickupType];
+	}
+
+	currentCount += count;
+	_playerPickups.Add(pickupType, currentCount);
+}
+
+void APlayerTopDownController::UsePickup(PickupType pickupType)
+{
+	if (_playerPickups.Contains(pickupType))
+	{
+		int count = _playerPickups[pickupType];
+		count -= 1;
+
+		if (count <= 0)
+		{
+			_playerPickups.Remove(pickupType);
+		}
+		else
+		{
+			_playerPickups.Add(pickupType, count);
+		}
+	}
+}
+
+bool APlayerTopDownController::HasPickup(PickupType pickupType)
+{
+	if (_playerPickups.Contains(pickupType) && _playerPickups[pickupType] > 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+TMap<PickupType, int> APlayerTopDownController::GetPickups()
+{
+	return _playerPickups;
 }
 
 void APlayerTopDownController::HandlePlayerMoveAction()

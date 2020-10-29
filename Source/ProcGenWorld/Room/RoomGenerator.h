@@ -79,27 +79,6 @@ public:
 	UPROPERTY(Category = Enemy, EditAnywhere)
 		TArray<TSubclassOf<class AEnemyControllerBase>> Enemies;
 
-	UPROPERTY(Category = Display, EditAnywhere)
-		UMaterialInstance* SpawnMaterial;
-
-	UPROPERTY(Category = Display, EditAnywhere)
-		UMaterialInstance* ExitMaterial;
-
-	UPROPERTY(Category = Display, EditAnywhere)
-		UMaterialInstance* GeneralMaterial;
-
-	UPROPERTY(Category = Display, EditAnywhere)
-		UMaterialInstance* TileMarkerMaterial;
-
-	UPROPERTY(Category = Display, EditAnywhere)
-		UMaterialInstance* UpgradeMaterial;
-
-	UPROPERTY(Category = Display, EditAnywhere)
-		UMaterialInstance* VictoryMaterial;
-
-	UPROPERTY(Category = Display, EditAnywhere)
-		UMaterialInstance* LavaMaterial;
-
 	UPROPERTY(Category = WallMovement, EditAnywhere)
 		float LerpSpeed;
 
@@ -116,9 +95,11 @@ public:
 	ATile* GetRandomTileInRoom(int& row, int& column);
 	ATile* GetTileAtPosition(int row, int column);
 	AEnemyControllerBase* GetEnemyAtPosition(int row, int column);
-	void ClearAllTilesStatus();
 	void MarkAdjacentMovementSpots(int currentRow, int currentColumn);
+
+	void ClearAllTileMarkedStatus();
 	void MarkTile(int row, int column);
+	void UnMarkTile(int row, int column);
 
 	TMap<int, TMap<int, WorldElementType>> GetWorldState();
 
@@ -168,12 +149,6 @@ public:
 
 	UFUNCTION(Category = Room, BlueprintCallable, BlueprintPure)
 		TArray<AActor*> GetWalls();
-
-	UFUNCTION(Category = Display, BlueprintCallable)
-		void SetFloorColor(int roomType, UStaticMeshComponent* mesh);
-
-	UFUNCTION(Category = Display, BlueprintImplementableEvent)
-		void UpdateFloorMaterial(int roomType);
 
 protected:
 	virtual void BeginPlay() override;

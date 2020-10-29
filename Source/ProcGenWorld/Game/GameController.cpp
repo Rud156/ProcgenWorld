@@ -97,7 +97,7 @@ void AGameController::EndPlayerTurn()
 	_isPlayerTurn = false;
 	_currentTurnTime = AITurnWaitTime;
 
-	_currentRoom->ClearAllTilesStatus();
+	_currentRoom->ClearAllTileMarkedStatus();
 	_playerTopDownController->DisablePlayerTurn();
 
 	ExecuteEnemyAI();

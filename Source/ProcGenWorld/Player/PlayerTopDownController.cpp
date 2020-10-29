@@ -177,7 +177,7 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 			_playerRoomRow = tile->GetRow();
 			_playerRoomColumn = tile->GetColumn();
 
-			_currentRoom->ClearAllTilesStatus();
+			_currentRoom->ClearAllTileMarkedStatus();
 			_gameController->EndPlayerTurn();
 		}
 	}
@@ -200,7 +200,7 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 				_playerRoomRow = tile->GetRow();
 				_playerRoomColumn = tile->GetColumn();
 
-				_currentRoom->ClearAllTilesStatus();
+				_currentRoom->ClearAllTileMarkedStatus();
 				_gameController->EndPlayerTurn();
 			}
 		}
@@ -221,7 +221,7 @@ void APlayerTopDownController::ExecuteAttackTileAction(ATile* tile)
 	{
 		enemy->TakeDamage(MeleeDamageAmount);
 
-		_currentRoom->ClearAllTilesStatus();
+		_currentRoom->ClearAllTileMarkedStatus();
 		_gameController->EndPlayerTurn();
 	}
 }
@@ -537,7 +537,7 @@ void APlayerTopDownController::ExecutePushAction(ATile* tile)
 		}
 	}
 
-	_currentRoom->ClearAllTilesStatus();
+	_currentRoom->ClearAllTileMarkedStatus();
 	_gameController->EndPlayerTurn();
 }
 
@@ -561,7 +561,7 @@ void APlayerTopDownController::ExecuteSpearThrowAction(ATile* tile)
 		tile->SetPickupType(PickupType::Spear);
 	}
 
-	_currentRoom->ClearAllTilesStatus();
+	_currentRoom->ClearAllTileMarkedStatus();
 	_gameController->EndPlayerTurn();
 }
 
@@ -594,7 +594,7 @@ void APlayerTopDownController::ExecuteDashAction(FHitResult hitResult, ATile* ti
 			_playerRoomRow = tile->GetRow();
 			_playerRoomColumn = tile->GetColumn();
 
-			_currentRoom->ClearAllTilesStatus();
+			_currentRoom->ClearAllTileMarkedStatus();
 			_gameController->EndPlayerTurn();
 		}
 	}
@@ -868,7 +868,7 @@ void APlayerTopDownController::HandlePlayerPushAction()
 	int floorRows = _currentRoom->GetRowCount() - 2;
 	int floorColumns = _currentRoom->GetColumnCount();
 
-	_currentRoom->ClearAllTilesStatus();
+	_currentRoom->ClearAllTileMarkedStatus();
 
 	if (leftSide >= 0 && worldState[_playerRoomRow][leftSide] == WorldElementType::Enemy)
 	{
@@ -902,7 +902,7 @@ void APlayerTopDownController::HandlePlayerAttackAction()
 	int floorRows = _currentRoom->GetRowCount() - 2;
 	int floorColumns = _currentRoom->GetColumnCount();
 
-	_currentRoom->ClearAllTilesStatus();
+	_currentRoom->ClearAllTileMarkedStatus();
 
 	if (leftSide >= 0 && worldState[_playerRoomRow][leftSide] == WorldElementType::Enemy)
 	{

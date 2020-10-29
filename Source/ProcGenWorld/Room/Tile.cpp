@@ -23,7 +23,7 @@ void ATile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	_isMoveable = false;
+	_isInteractible = false;
 }
 
 // Called every frame
@@ -49,22 +49,21 @@ void ATile::SetPositionInRoom(int row, int column)
 	_column = column;
 }
 
-
 bool ATile::IsTileMarked()
 {
-	return _isMoveable;
+	return _isInteractible;
 }
 
-void ATile::MarkTileMoveable(UMaterialInstance* markedMaterial)
+void ATile::MarkTileInteractible()
 {
-	_isMoveable = true;
-	SetTileMarkedMaterial(markedMaterial);
+	_isInteractible = true;
+	SetOutlineStatus(true);
 }
 
-void ATile::ClearTileMoveableStatus(UMaterialInstance* defaultMaterial)
+void ATile::ClearTileMarkedStatus()
 {
-	_isMoveable = false;
-	SetTileUnMarkedMaterial(defaultMaterial);
+	_isInteractible = false;
+	SetOutlineStatus(false);
 }
 
 int ATile::GetRow()
@@ -80,6 +79,26 @@ int ATile::GetColumn()
 void ATile::SetTileType(TileType tileType)
 {
 	_tileType = tileType;
+
+	switch (tileType)
+	{
+	case TileType::LavaTile:
+		SetTileMaterial(LavaMaterial);
+		break;
+
+	case TileType::VictoryTile:
+		SetTileMaterial(VictoryMaterial);
+		break;
+
+	case TileType::UpgradeTile:
+		SetTileMaterial(UpgradeMaterial);
+		break;
+
+	case TileType::FloorTile:
+	default:
+		SetTileMaterial(FloorMaterial);
+		break;
+	}
 }
 
 TileType ATile::GetTileType()
@@ -94,12 +113,21 @@ void ATile::SetPickupType(PickupType pickupType)
 		_pickupItem->Destroy();
 	}
 
-	_pickupType = pickupType;
-	if (_pickupType == PickupType::Spear)
+	AActor* pickup = nullptr;
+	switch (pickupType)
 	{
-		auto pickupItem = GetWorld()->SpawnActor(SpearPickup, &TileCenter, &FRotator::ZeroRotator);
-		_pickupItem = pickupItem;
+	case PickupType::None:
+		break;
+
+	case PickupType::Spear:
+		pickup = GetWorld()->SpawnActor(Pickups[pickupType], &TileCenter, &FRotator::ZeroRotator);
+		break;
+
+	default:
+		break;
 	}
+
+	_pickupItem = pickup;
 }
 
 void ATile::ClearPickup()

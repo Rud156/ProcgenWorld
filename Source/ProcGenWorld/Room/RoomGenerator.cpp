@@ -294,17 +294,8 @@ AEnemyControllerBase* ARoomGenerator::GetEnemyAtPosition(int row, int column)
 	return nullptr;
 }
 
-void ARoomGenerator::ClearAllTilesStatus()
-{
-	for (int i = 0; i < _floorTiles.Num(); i++) {
-		_floorTiles[i]->ClearTileMoveableStatus(_roomDefaultMaterial);
-	}
-}
-
 void ARoomGenerator::MarkAdjacentMovementSpots(int currentRow, int currentColumn)
 {
-	ClearAllTilesStatus();
-
 	int leftColumn = currentColumn - 1;
 	int rightColumn = currentColumn + 1;
 	int topRow = currentRow - 1;
@@ -325,28 +316,28 @@ void ARoomGenerator::MarkAdjacentMovementSpots(int currentRow, int currentColumn
 
 
 	if (leftColumn != currentColumn) {
-		_floorMatrix[currentRow][leftColumn]->MarkTileMoveable(TileMarkerMaterial);
+		_floorMatrix[currentRow][leftColumn]->MarkTileInteractible();
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Left Is Same");
 	}
 	if (rightColumn != currentColumn) {
-		_floorMatrix[currentRow][rightColumn]->MarkTileMoveable(TileMarkerMaterial);
+		_floorMatrix[currentRow][rightColumn]->MarkTileInteractible();
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Right Is Same");
 	}
 	if (topRow != currentRow) {
-		_floorMatrix[topRow][currentColumn]->MarkTileMoveable(TileMarkerMaterial);
+		_floorMatrix[topRow][currentColumn]->MarkTileInteractible();
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Top Is Same");
 	}
 	if (bottomRow != currentRow) {
-		_floorMatrix[bottomRow][currentColumn]->MarkTileMoveable(TileMarkerMaterial);
+		_floorMatrix[bottomRow][currentColumn]->MarkTileInteractible();
 	}
 	else
 	{
@@ -354,11 +345,23 @@ void ARoomGenerator::MarkAdjacentMovementSpots(int currentRow, int currentColumn
 	}
 }
 
-void ARoomGenerator::MarkTile(int row, int column)
+void ARoomGenerator::ClearAllTileMarkedStatus()
 {
-	_floorMatrix[row][column]->MarkTileMoveable(TileMarkerMaterial);
+	for(int i = 0; i < _floorTiles.Num(); i++)
+	{
+		_floorTiles[i]->ClearTileMarkedStatus();
+	}
 }
 
+void ARoomGenerator::MarkTile(int row, int column)
+{
+	_floorMatrix[row][column]->MarkTileInteractible();
+}
+
+void ARoomGenerator::UnMarkTile(int row, int column)
+{
+	_floorMatrix[row][column]->ClearTileMarkedStatus();
+}
 
 TMap<int, TMap<int, WorldElementType>> ARoomGenerator::GetWorldState()
 {
@@ -719,22 +722,4 @@ TArray<ATile*> ARoomGenerator::GetFloorTiles()
 TArray<AActor*> ARoomGenerator::GetWalls()
 {
 	return _walls;
-}
-
-void ARoomGenerator::SetFloorColor(int roomType, UStaticMeshComponent* mesh)
-{
-	// 1: Spawn, 2: Exit, 3: General
-
-	if (roomType == 1) {
-		mesh->SetMaterial(0, SpawnMaterial);
-		_roomDefaultMaterial = SpawnMaterial;
-	}
-	else if (roomType == 2) {
-		mesh->SetMaterial(0, ExitMaterial);
-		_roomDefaultMaterial = ExitMaterial;
-	}
-	else {
-		mesh->SetMaterial(0, GeneralMaterial);
-		_roomDefaultMaterial = GeneralMaterial;
-	}
 }

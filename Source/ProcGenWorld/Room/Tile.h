@@ -15,7 +15,7 @@ class PROCGENWORLD_API ATile : public AActor
 	GENERATED_BODY()
 
 	ARoomGenerator* _roomParent;
-	bool _isMoveable;
+	bool _isInteractible;
 
 	PickupType _pickupType;
 	AActor* _pickupItem;
@@ -38,7 +38,19 @@ public:
 		FVector TileCenterOffset;
 
 	UPROPERTY(Category = Pickups, EditAnywhere)
-		TSubclassOf<class AActor> SpearPickup;
+		TMap<PickupType, TSubclassOf<class AActor>> Pickups;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* FloorMaterial;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* UpgradeMaterial;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* VictoryMaterial;
+
+	UPROPERTY(Category = Display, EditAnywhere)
+		UMaterialInstance* LavaMaterial;
 
 #pragma endregion
 
@@ -46,18 +58,18 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(Category = Display, BlueprintImplementableEvent)
-		void SetTileMarkedMaterial(UMaterialInstance* markedMaterial);
+		void SetTileMaterial(UMaterialInstance* material);
 
 	UFUNCTION(Category = Display, BlueprintImplementableEvent)
-		void SetTileUnMarkedMaterial(UMaterialInstance* defaultMaterial);
+		void SetOutlineStatus(bool isVisible);
 
 	void SetTileParent(ARoomGenerator* roomGenerator);
 	ARoomGenerator* GetTileParentRoom();
 	void SetPositionInRoom(int row, int column);
 
 	bool IsTileMarked();
-	void MarkTileMoveable(UMaterialInstance* markedMaterial);
-	void ClearTileMoveableStatus(UMaterialInstance* defaultMaterial);
+	void MarkTileInteractible();
+	void ClearTileMarkedStatus();
 
 	int GetRow();
 	int GetColumn();

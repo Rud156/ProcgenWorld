@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "../Data/EnumData.h"
+#include "../Data/StructData.h"
 #include "UpgradeController.generated.h"
 
 class APlayerTopDownController;
@@ -21,7 +22,7 @@ public:
 #pragma region Properties
 
 	UPROPERTY(Category = Upgrade, EditAnywhere)
-		TMap<UpgradeType, FString> UpgradesData;
+		TMap<UpgradeType, FUpgradeData> UpgradesData;
 
 #pragma endregion
 
@@ -30,10 +31,10 @@ public:
 
 	void SetPlayerController(APlayerTopDownController* playerController);
 
-	void EnableRandomUpgrades();
+	void ShowRandomUpgrades();
 
 	UFUNCTION(Category = Upgrades, BlueprintImplementableEvent)
-		void DisplayUpgradesUI(const TMap<UpgradeType, FString> &upgrades);
+		void DisplayUpgradesUI(const TMap<UpgradeType, FUpgradeData> &upgrades);
 
 	UFUNCTION(Category = Upgrades, BlueprintImplementableEvent)
 		void ClearUpgradesUI();

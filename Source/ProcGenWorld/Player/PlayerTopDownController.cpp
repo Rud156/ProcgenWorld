@@ -178,7 +178,16 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 			_playerRoomColumn = tile->GetColumn();
 
 			_currentRoom->ClearAllTileMarkedStatus();
-			_gameController->EndPlayerTurn();
+
+			if (tile->GetTileType() == TileType::UpgradeTile)
+			{
+				_gameController->ResetPlayerTurnTime();
+				_upgradeController->ShowRandomUpgrades();
+			}
+			else
+			{
+				_gameController->EndPlayerTurn();
+			}
 		}
 	}
 	else if (isTileMarked && tileData == WorldElementType::Enemy)
@@ -201,7 +210,16 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 				_playerRoomColumn = tile->GetColumn();
 
 				_currentRoom->ClearAllTileMarkedStatus();
-				_gameController->EndPlayerTurn();
+
+				if (tile->GetTileType() == TileType::UpgradeTile)
+				{
+					_gameController->ResetPlayerTurnTime();
+					_upgradeController->ShowRandomUpgrades();
+				}
+				else
+				{
+					_gameController->EndPlayerTurn();
+				}
 			}
 		}
 	}
@@ -595,7 +613,16 @@ void APlayerTopDownController::ExecuteDashAction(FHitResult hitResult, ATile* ti
 			_playerRoomColumn = tile->GetColumn();
 
 			_currentRoom->ClearAllTileMarkedStatus();
-			_gameController->EndPlayerTurn();
+
+			if (tile->GetTileType() == TileType::UpgradeTile)
+			{
+				_gameController->ResetPlayerTurnTime();
+				_upgradeController->ShowRandomUpgrades();
+			}
+			else
+			{
+				_gameController->EndPlayerTurn();
+			}
 		}
 	}
 	else

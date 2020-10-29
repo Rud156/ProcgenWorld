@@ -1,7 +1,7 @@
 # ProcgenWorld
 > Work in progress
 
- - [ ] Better way to display tiles
+ - [X] Better way to display tiles
  - [X] Tile hover display
  - [ ] Better Pickup System and Spawn
  - [ ] Pickup display (UI and World)

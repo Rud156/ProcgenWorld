@@ -22,6 +22,10 @@ class PROCGENWORLD_API AGameController : public AActor
 
 	bool _gameTurnActive;
 	bool _isPlayerTurn;
+
+	bool _nextTurnPlayer;
+	float _currentTurnEndDelay;
+
 	float _currentTurnTime;
 
 #pragma endregion
@@ -42,6 +46,9 @@ public:
 	UPROPERTY(Category = Timing, EditAnywhere)
 		float AITurnWaitTime;
 
+	UPROPERTY(Category = Timing, EditAnywhere)
+		float TurnEndDelay;
+
 	UFUNCTION(Category = Timing, BlueprintCallable)
 		void EndPlayerTurn();
 
@@ -51,10 +58,15 @@ public:
 	UFUNCTION(Category = Timing, BlueprintCallable, BlueprintPure)
 		float GetTurnTime();
 
+	UFUNCTION(Category = Timing, BlueprintCallable, BlueprintPure)
+		float GetTurnDelayTime();
+
 	void SetPlayerTopDownController(APlayerTopDownController* playerTopDownController);
 	void SetCurrentRoom(ARoomGenerator* currentRoom);
 	UFUNCTION()
-	void HandleRoomCleared();
+		void HandleRoomCleared();
+
+	void ResetPlayerTurnTime();
 
 	void BeginGameTurn();
 	void EndGameTurn();

@@ -34,6 +34,18 @@ void AGameController::Tick(float DeltaTime)
 		return;
 	}
 
+	if (_currentTurnEndDelay > 0)
+	{
+		_currentTurnEndDelay -= DeltaTime;
+
+		if (_currentTurnEndDelay <= 0 && !_nextTurnPlayer)
+		{
+			ExecuteEnemyAI();
+		}
+
+		return;
+	}
+
 	if (_currentTurnTime > 0)
 	{
 		_currentTurnTime -= DeltaTime;
@@ -68,6 +80,11 @@ void AGameController::HandleRoomCleared()
 	EndGameTurn();
 }
 
+void AGameController::ResetPlayerTurnTime()
+{
+	_currentTurnTime = PlayerTurnWaitTime;
+}
+
 void AGameController::BeginGameTurn()
 {
 	_gameTurnActive = true;
@@ -88,19 +105,23 @@ void AGameController::BeginPlayerTurn()
 {
 	_isPlayerTurn = true;
 	_currentTurnTime = PlayerTurnWaitTime;
+	_currentTurnEndDelay = TurnEndDelay;
 
 	_playerTopDownController->EnablePlayerTurn();
+
+	_nextTurnPlayer = true;
 }
 
 void AGameController::EndPlayerTurn()
 {
 	_isPlayerTurn = false;
 	_currentTurnTime = AITurnWaitTime;
+	_currentTurnEndDelay = TurnEndDelay;
 
 	_currentRoom->ClearAllTileMarkedStatus();
 	_playerTopDownController->DisablePlayerTurn();
 
-	ExecuteEnemyAI();
+	_nextTurnPlayer = false;
 }
 
 void AGameController::ExecuteEnemyAI()
@@ -122,3 +143,7 @@ float AGameController::GetTurnTime()
 	return _currentTurnTime;
 }
 
+float AGameController::GetTurnDelayTime()
+{
+	return _currentTurnEndDelay;
+}

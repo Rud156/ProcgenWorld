@@ -28,7 +28,7 @@ void AUpgradeController::SetPlayerController(APlayerTopDownController* playerCon
 	_playerController = playerController;
 }
 
-void AUpgradeController::EnableRandomUpgrades()
+void AUpgradeController::ShowRandomUpgrades()
 {
 	TArray<UpgradeType> possibleUpgrades;
 	UpgradesData.GetKeys(possibleUpgrades);
@@ -38,7 +38,7 @@ void AUpgradeController::EnableRandomUpgrades()
 			return FMath::FRand() <= 0.5f;
 		});
 
-	TMap<UpgradeType, FString> upgrades = TMap<UpgradeType, FString>();
+	TMap<UpgradeType, FUpgradeData> upgrades = TMap<UpgradeType, FUpgradeData>();
 	for (int i = 0; i < MAX_UPGRADES; i++)
 	{
 		upgrades.Add(possibleUpgrades[0], UpgradesData[possibleUpgrades[0]]);

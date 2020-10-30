@@ -9,6 +9,7 @@
 #include "../Room/Tile.h"
 #include "../Room/RoomGenerator.h"
 #include "../Game/GameController.h"
+#include "../Game/MainGameInstance.h"
 
 #include "Components/SceneComponent.h"
 
@@ -185,6 +186,14 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 				_gameController->ResetPlayerTurnTime();
 				_upgradeController->ShowRandomUpgrades();
 			}
+			else if (tile->GetTileType() == TileType::VictoryTile)
+			{
+				auto gameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+				auto mainGameInstance = Cast<UMainGameInstance>(gameInstance);
+				mainGameInstance->DidPlayerWin = true;
+
+				UGameplayStatics::OpenLevel(GetWorld(), EndingLevel);
+			}
 			else
 			{
 				_gameController->EndPlayerTurn();
@@ -216,6 +225,14 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 				{
 					_gameController->ResetPlayerTurnTime();
 					_upgradeController->ShowRandomUpgrades();
+				}
+				else if (tile->GetTileType() == TileType::VictoryTile)
+				{
+					auto gameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+					auto mainGameInstance = Cast<UMainGameInstance>(gameInstance);
+					mainGameInstance->DidPlayerWin = true;
+
+					UGameplayStatics::OpenLevel(GetWorld(), EndingLevel);
 				}
 				else
 				{
@@ -620,6 +637,14 @@ void APlayerTopDownController::ExecuteDashAction(FHitResult hitResult, ATile* ti
 				_gameController->ResetPlayerTurnTime();
 				_upgradeController->ShowRandomUpgrades();
 			}
+			else if (tile->GetTileType() == TileType::VictoryTile)
+			{
+				auto gameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+				auto mainGameInstance = Cast<UMainGameInstance>(gameInstance);
+				mainGameInstance->DidPlayerWin = true;
+
+				UGameplayStatics::OpenLevel(GetWorld(), EndingLevel);
+			}
 			else
 			{
 				_gameController->EndPlayerTurn();
@@ -737,6 +762,14 @@ void APlayerTopDownController::HandlePlayerReachedPosition()
 			_gameController->SetCurrentRoom(parentRoom);
 			_gameController->BeginGameTurn();
 		}
+		else if (tile->GetTileType() == TileType::VictoryTile)
+		{
+			auto gameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+			auto mainGameInstance = Cast<UMainGameInstance>(gameInstance);
+			mainGameInstance->DidPlayerWin = true;
+
+			UGameplayStatics::OpenLevel(GetWorld(), EndingLevel);
+		}
 	}
 }
 
@@ -772,6 +805,12 @@ void APlayerTopDownController::TakeDamage(int damageAmount)
 void APlayerTopDownController::HandlePlayerDied()
 {
 	OnPlayerDied.Broadcast();
+
+	auto gameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+	auto mainGameInstance = Cast<UMainGameInstance>(gameInstance);
+	mainGameInstance->DidPlayerWin = false;
+
+	UGameplayStatics::OpenLevel(GetWorld(), EndingLevel);
 }
 
 int APlayerTopDownController::GetPlayerMana()

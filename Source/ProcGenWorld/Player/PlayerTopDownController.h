@@ -23,7 +23,7 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
 	GENERATED_BODY()
 
-		UPROPERTY(Category = Actor, VisibleDefaultsOnly)
+	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
 		class USceneComponent* TopDownSceneComponent;
 
 	AGameController* _gameController;
@@ -124,6 +124,9 @@ public:
 
 	UPROPERTY(Category = PlayerStats, EditAnywhere)
 		float EnemyPushDamage;
+
+	UPROPERTY(Category = Levels, EditAnywhere)
+		FName EndingLevel;
 
 	UPROPERTY(Category = Spawning, BlueprintAssignable)
 		FPlayerDied OnPlayerDied;

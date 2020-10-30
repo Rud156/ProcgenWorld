@@ -44,6 +44,14 @@ void AEnemyControllerBase::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void AEnemyControllerBase::HandleEnemyReachedPosition()
+{
+	if (_lastTargetTile->GetTileType() == TileType::LavaTile)
+	{
+		TakeDamage(GetMaxHealth());
+	}
+}
+
 void AEnemyControllerBase::SetParentRoom(ARoomGenerator* roomGenerator)
 {
 	_parentRoom = roomGenerator;
@@ -102,5 +110,6 @@ void AEnemyControllerBase::Move(int row, int column)
 
 	_currentRow = row;
 	_currentColumn = column;
+	_lastTargetTile = targetTile;
 }
 

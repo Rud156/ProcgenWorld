@@ -55,6 +55,8 @@ class PROCGENWORLD_API APlayerTopDownController : public APawn
 	bool _hasFreeMovement;
 	bool _isPlayerTurn;
 
+	bool _isPlayerMoving;
+
 	void HandleMouseClicked();
 	void Handle1Pressed();
 	void Handle2Pressed();

@@ -114,13 +114,15 @@ void ATile::SetPickupType(PickupType pickupType)
 	}
 
 	AActor* pickup = nullptr;
+	FVector spawnPosition = TileCenter + PickupSpawnOffset;
+
 	switch (pickupType)
 	{
 	case PickupType::None:
 		break;
 
 	case PickupType::Spear:
-		pickup = GetWorld()->SpawnActor(Pickups[pickupType], &TileCenter, &FRotator::ZeroRotator);
+		pickup = GetWorld()->SpawnActor(Pickups[pickupType], &spawnPosition, &FRotator::ZeroRotator);
 		break;
 
 	default:

@@ -96,6 +96,11 @@ void APlayerTopDownController::SetupPlayerInputComponent(UInputComponent* Player
 
 void APlayerTopDownController::HandleMouseClicked()
 {
+	if (_isPlayerMoving)
+	{
+		return;
+	}
+
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Mouse Clicked");
 	APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
@@ -168,11 +173,13 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 	int column = tile->GetColumn();
 	auto tileData = worldStatus[row][column];
 
-	if (isTileMarked && tileData == WorldElementType::Floor) {
+	if (isTileMarked && (tileData == WorldElementType::Floor || tileData == WorldElementType::LavaTile)) {
 		bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
 
 		if (movementSuccess)
 		{
+			_isPlayerMoving = true;
+
 			CollectPickup(tile->GetPickupType());
 			tile->ClearPickup();
 
@@ -213,6 +220,8 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 			bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
 			if (movementSuccess)
 			{
+				_isPlayerMoving = true;
+
 				CollectPickup(tile->GetPickupType());
 				tile->ClearPickup();
 
@@ -249,6 +258,12 @@ void APlayerTopDownController::ExecuteMoveToTileAction(FHitResult hitResult, ATi
 
 void APlayerTopDownController::ExecuteAttackTileAction(ATile* tile)
 {
+	if (!tile->IsTileMarked())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Invalid Tile Attacked");
+		return;
+	}
+
 	int row = tile->GetRow();
 	int column = tile->GetColumn();
 	auto enemy = _currentRoom->GetEnemyAtPosition(row, column);
@@ -616,12 +631,14 @@ void APlayerTopDownController::ExecuteDashAction(FHitResult hitResult, ATile* ti
 	int column = tile->GetColumn();
 	auto tileData = worldStatus[row][column];
 
-	if (isTileMarked && tileData == WorldElementType::Floor) {
+	if (isTileMarked && (tileData == WorldElementType::Floor || tileData == WorldElementType::LavaTile)) {
 		_playerCharacter->GetCharacterMovement()->MaxWalkSpeed = DashMovementSpeed;
 		bool movementSuccess = _playerCharacter->MoveToTilePosition(hitResult, tile);
 
 		if (movementSuccess)
 		{
+			_isPlayerMoving = true;
+
 			UseMana(DashManaCost);
 
 			CollectPickup(tile->GetPickupType());
@@ -743,11 +760,10 @@ int APlayerTopDownController::GetPlayerColumn()
 void APlayerTopDownController::HandlePlayerReachedPosition()
 {
 	_playerCharacter->GetCharacterMovement()->MaxWalkSpeed = DefaultMovementSpeed;
+	ATile* tile = _lastClickedTile;
 
 	if (_hasFreeMovement)
 	{
-		ATile* tile = _lastClickedTile;
-
 		_playerRoomRow = tile->GetRow();
 		_playerRoomColumn = tile->GetColumn();
 
@@ -771,6 +787,17 @@ void APlayerTopDownController::HandlePlayerReachedPosition()
 			UGameplayStatics::OpenLevel(GetWorld(), EndingLevel);
 		}
 	}
+
+	if (tile->GetTileType() == TileType::LavaTile)
+	{
+		auto gameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+		auto mainGameInstance = Cast<UMainGameInstance>(gameInstance);
+		mainGameInstance->DidPlayerWin = false;
+
+		UGameplayStatics::OpenLevel(GetWorld(), EndingLevel);
+	}
+
+	_isPlayerMoving = false;
 }
 
 int APlayerTopDownController::GetPlayerHealth()

@@ -36,6 +36,9 @@ public:
 
 	UPROPERTY(Category = Positions, EditAnywhere)
 		FVector TileCenterOffset;
+	
+	UPROPERTY(Category = Positions, EditAnywhere)
+		FVector PickupSpawnOffset;
 
 	UPROPERTY(Category = Pickups, EditAnywhere)
 		TMap<PickupType, TSubclassOf<class AActor>> Pickups;

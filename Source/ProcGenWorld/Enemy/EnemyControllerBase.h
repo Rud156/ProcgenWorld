@@ -8,11 +8,14 @@
 
 class ARoomGenerator;
 class APlayerTopDownController;
+class ATile;
 
 UCLASS()
 class PROCGENWORLD_API AEnemyControllerBase : public ACharacter
 {
 	GENERATED_BODY()
+
+	ATile* _lastTargetTile;
 
 public:
 	UPROPERTY(Category = EnemyStats, EditAnywhere)
@@ -24,6 +27,9 @@ public:
 
 	UFUNCTION(Category = Movement, BlueprintImplementableEvent)
 		void MoveEnemyTo(FVector targetLocation);
+
+	UFUNCTION(Category = AI, BlueprintCallable)
+		void HandleEnemyReachedPosition();
 
 	void SetParentRoom(ARoomGenerator* roomGenerator);
 	void SetSpawnPosition(int row, int column);

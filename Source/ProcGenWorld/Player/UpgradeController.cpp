@@ -41,7 +41,7 @@ void AUpgradeController::ShowRandomUpgrades()
 	TMap<UpgradeType, FUpgradeData> upgrades = TMap<UpgradeType, FUpgradeData>();
 	for (int i = 0; i < MAX_UPGRADES; i++)
 	{
-		upgrades.Add(possibleUpgrades[0], UpgradesData[possibleUpgrades[0]]);
+		upgrades.Add(possibleUpgrades[i], UpgradesData[possibleUpgrades[i]]);
 	}
 
 	DisplayUpgradesUI(upgrades);

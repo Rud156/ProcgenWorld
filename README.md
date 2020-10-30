@@ -3,7 +3,7 @@
 
  - [X] Better way to display tiles
  - [X] Tile hover display
- - [ ] Better Pickup System and Spawn
+ - [X] Better Pickup System and Spawn
  - [ ] Pickup display (UI and World)
  - [X] Pickup stacking
  - [X] Upgrade Display

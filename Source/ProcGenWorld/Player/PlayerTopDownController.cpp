@@ -64,6 +64,7 @@ void APlayerTopDownController::BeginPlay()
 
 	auto upgradeActor = GetWorld()->SpawnActor(UpgradeController, &FVector::ZeroVector, &FRotator::ZeroRotator);
 	_upgradeController = Cast<AUpgradeController>(upgradeActor);
+	_upgradeController->SetPlayerController(this);
 
 	_hoverDisplayTile = GetWorld()->SpawnActor(HoverDisplayPrefab, &FVector::ZeroVector, &FRotator::ZeroRotator);
 }
@@ -830,6 +831,13 @@ void APlayerTopDownController::ApplyUpgrade(UpgradeType upgradeType)
 	default:
 		break;
 	}
+
+	if (_lastClickedTile->GetTileType() == TileType::UpgradeTile)
+	{
+		_lastClickedTile->SetTileType(TileType::FloorTile);
+	}
+
+	_gameController->EndPlayerTurn();
 }
 
 void APlayerTopDownController::CollectPickup(PickupType pickupType, int count)
@@ -879,12 +887,15 @@ TMap<PickupType, int> APlayerTopDownController::GetPickups()
 
 void APlayerTopDownController::HandlePlayerMoveAction()
 {
+	_currentRoom->ClearAllTileMarkedStatus();
+
 	_currentRoom->MarkAdjacentMovementSpots(_playerRoomRow, _playerRoomColumn);
 	_lastPlayerAction = ActionType::Move;
 }
 
 void APlayerTopDownController::HandlePlayerPushAction()
 {
+	_currentRoom->ClearAllTileMarkedStatus();
 	auto worldState = _currentRoom->GetWorldState();
 
 	int leftSide = _playerRoomColumn - 1;
@@ -894,8 +905,6 @@ void APlayerTopDownController::HandlePlayerPushAction()
 
 	int floorRows = _currentRoom->GetRowCount() - 2;
 	int floorColumns = _currentRoom->GetColumnCount();
-
-	_currentRoom->ClearAllTileMarkedStatus();
 
 	if (leftSide >= 0 && worldState[_playerRoomRow][leftSide] == WorldElementType::Enemy)
 	{
@@ -919,6 +928,8 @@ void APlayerTopDownController::HandlePlayerPushAction()
 
 void APlayerTopDownController::HandlePlayerAttackAction()
 {
+	_currentRoom->ClearAllTileMarkedStatus();
+
 	auto worldState = _currentRoom->GetWorldState();
 
 	int leftSide = _playerRoomColumn - 1;
@@ -953,6 +964,8 @@ void APlayerTopDownController::HandlePlayerAttackAction()
 
 void APlayerTopDownController::HandlePlayerSpearAction()
 {
+	_currentRoom->ClearAllTileMarkedStatus();
+
 	int minTopLeftRow = _playerRoomRow - _minSpearRadius;
 	int minTopLeftColumn = _playerRoomColumn - _minSpearRadius;
 	int minBottomRightRow = _playerRoomRow + _minSpearRadius;
@@ -981,6 +994,8 @@ void APlayerTopDownController::HandlePlayerSpearAction()
 
 void APlayerTopDownController::HandlePlayerDashAction()
 {
+	_currentRoom->ClearAllTileMarkedStatus();
+
 	int minTopLeftRow = _playerRoomRow - _minJumpRadius;
 	int minTopLeftColumn = _playerRoomColumn - _minJumpRadius;
 	int minBottomRightRow = _playerRoomRow + _minJumpRadius;

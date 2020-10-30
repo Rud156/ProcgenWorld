@@ -126,6 +126,7 @@ void AGameController::EndPlayerTurn()
 
 void AGameController::ExecuteEnemyAI()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Executing Enemy AI");
 	auto enemies = _currentRoom->GetEnemies();
 	for (int i = 0; i < enemies.Num(); i++)
 	{

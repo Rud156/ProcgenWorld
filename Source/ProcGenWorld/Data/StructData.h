@@ -20,3 +20,12 @@ struct FUpgradeData
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FString UpgradeDescription;
 };
+
+USTRUCT(BlueprintType)
+struct FMyPickupType
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TMap<PickupType, int> Pickups;
+};

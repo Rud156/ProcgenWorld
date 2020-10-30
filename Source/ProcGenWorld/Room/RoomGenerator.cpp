@@ -2,6 +2,8 @@
 
 
 #include "RoomGenerator.h"
+
+#include "DungeonGenerator.h"
 #include "Tile.h"
 #include "../Player/PlayerTopDownController.h"
 #include "../Enemy/EnemyControllerBase.h"
@@ -347,7 +349,7 @@ void ARoomGenerator::MarkAdjacentMovementSpots(int currentRow, int currentColumn
 
 void ARoomGenerator::ClearAllTileMarkedStatus()
 {
-	for(int i = 0; i < _floorTiles.Num(); i++)
+	for (int i = 0; i < _floorTiles.Num(); i++)
 	{
 		_floorTiles[i]->ClearTileMarkedStatus();
 	}
@@ -488,8 +490,8 @@ void ARoomGenerator::CheckAndActivateRoom()
 {
 	if (!_isRoomCleared)
 	{
-		SpawnRoomTiles();
 		SpawnEnemies();
+		SpawnRoomTiles();
 		SpawnRoomDoors();
 	}
 }
@@ -497,6 +499,11 @@ void ARoomGenerator::CheckAndActivateRoom()
 void ARoomGenerator::SetPlayerController(APlayerTopDownController* playerController)
 {
 	_playerController = playerController;
+}
+
+void ARoomGenerator::SetDungeonGenerator(ADungeonGenerator* dungeonGenerator)
+{
+	_dungeonGenerator = dungeonGenerator;
 }
 
 void ARoomGenerator::SpawnEnemies()
@@ -665,32 +672,52 @@ void ARoomGenerator::SpawnRoomTiles()
 			return FMath::FRand() <= 0.5f;
 		});
 
-	int randomNumber = FMath::RandRange(3, 5);
-	for (int i = 0; i < emptyPositions.Num(); i++)
-	{
-		if (i > randomNumber)
-		{
-			break;
-		}
+	int currentCounter = 0;
 
+	// Lava Tiles
+	int lavaTileCount = FMath::RandRange(MinLavaTiles, MaxLavaTiles);
+	lavaTileCount += currentCounter;
+	for (int i = currentCounter; i < lavaTileCount; i++)
+	{
 		auto position = emptyPositions[i];
 		ATile* tile = _floorMatrix[position.Key][position.Value];
 
-		int randomTileType = FMath::RandRange(0, 2);
-		switch (randomTileType)
-		{
-		case 0:
-			tile->SetTileType(TileType::LavaTile);
-			break;
+		tile->SetTileType(TileType::LavaTile);
+		currentCounter += 1;
+	}
 
-		case 1:
-			tile->SetTileType(TileType::UpgradeTile);
-			break;
+	// Upgrade Tiles
+	int upgradeTileCount = FMath::RandRange(MinUpgradeTiles, MaxUpgradeTiles);
+	upgradeTileCount += currentCounter;
+	for (int i = currentCounter; i < upgradeTileCount; i++)
+	{
+		auto position = emptyPositions[i];
+		ATile* tile = _floorMatrix[position.Key][position.Value];
 
-		case 2:
-			tile->SetPickupType(PickupType::Spear);
-			break;
-		}
+		tile->SetTileType(TileType::UpgradeTile);
+		currentCounter += 1;
+	}
+
+	// Pickup Tiles
+	int pickupTileCount = FMath::RandRange(MinPickupTiles, MaxPickupTiles);
+	pickupTileCount += currentCounter;
+	for (int i = currentCounter; i < pickupTileCount; i++)
+	{
+		auto position = emptyPositions[i];
+		ATile* tile = _floorMatrix[position.Key][position.Value];
+
+		tile->SetPickupType(PickupType::Spear); // TODO: Change this later on when there is more than 1 pickup...
+		currentCounter += 1;
+	}
+
+	// Victory Tile
+	if (_roomRow == _dungeonGenerator->GetExitRow() && _roomColumn == _dungeonGenerator->GetExitColumn())
+	{
+		auto position = emptyPositions[currentCounter];
+		ATile* tile = _floorMatrix[position.Key][position.Value];
+
+		tile->SetTileType(TileType::VictoryTile);
+		currentCounter += 1;
 	}
 }
 
@@ -702,7 +729,6 @@ void ARoomGenerator::ClearRoomTiles()
 		_floorTiles[i]->SetPickupType(PickupType::None);
 	}
 }
-
 
 int ARoomGenerator::GetRoomDepth()
 {

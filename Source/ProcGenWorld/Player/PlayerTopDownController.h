@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "ProcGenWorld/Data/EnumData.h"
+#include "../Data/EnumData.h"
+#include "../Data/StructData.h"
 #include "PlayerTopDownController.generated.h"
 
 class APlayerCharacter;
@@ -15,21 +16,22 @@ class AGameController;
 class ATile;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDied);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPickupsChanged, FMyPickupType, Pickups);
 
 UCLASS()
 class PROCGENWORLD_API APlayerTopDownController : public APawn
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = Actor, VisibleDefaultsOnly)
+		UPROPERTY(Category = Actor, VisibleDefaultsOnly)
 		class USceneComponent* TopDownSceneComponent;
 
 	AGameController* _gameController;
 	AUpgradeController* _upgradeController;
-	
+
 	APlayerCharacter* _playerCharacter;
 	ARoomGenerator* _currentRoom;
-	
+
 	ATile* _lastClickedTile;
 	AActor* _hoverDisplayTile;
 
@@ -83,7 +85,7 @@ public:
 
 	UPROPERTY(Category = Display, EditAnywhere)
 		FVector HoverDisplayDefaultPosition;
-	
+
 	UPROPERTY(Category = Display, EditAnywhere)
 		TSubclassOf<class AActor> HoverDisplayPrefab;
 
@@ -125,6 +127,9 @@ public:
 
 	UPROPERTY(Category = Spawning, BlueprintAssignable)
 		FPlayerDied OnPlayerDied;
+
+	UPROPERTY(Category = Pickups, BlueprintAssignable)
+		FPickupsChanged OnPickupsChanged;
 
 #pragma endregion
 
@@ -172,7 +177,7 @@ public:
 	void UseMana(int manaAmount);
 
 	void ApplyUpgrade(UpgradeType upgradeType);
-	
+
 	void CollectPickup(PickupType pickupType, int count = 1);
 	void UsePickup(PickupType pickupType);
 	bool HasPickup(PickupType pickupType);

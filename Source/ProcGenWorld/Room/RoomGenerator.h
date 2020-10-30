@@ -12,6 +12,7 @@
 class ATile;
 class AEnemyControllerBase;
 class APlayerTopDownController;
+class ADungeonGenerator;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRoomCleared);
 
@@ -28,6 +29,8 @@ private:
 	int _columnCount;
 	TMap<int, TMap<int, FWindowsPlatformTypes::TCHAR>> _room;
 	TMap<int, TMap<int, ATile*>> _floorMatrix;
+
+	ADungeonGenerator* _dungeonGenerator;
 
 	UMaterialInstance* _roomDefaultMaterial;
 	FVector _startPosition;
@@ -76,6 +79,24 @@ public:
 	UPROPERTY(Category = Wall, EditAnywhere)
 		float WallThickness;
 
+	UPROPERTY(Category = SpawnCounts, EditAnywhere)
+		int MinLavaTiles;
+
+	UPROPERTY(Category = SpawnCounts, EditAnywhere)
+		int MaxLavaTiles;
+
+	UPROPERTY(Category = SpawnCounts, EditAnywhere)
+		int MinUpgradeTiles;
+	
+	UPROPERTY(Category = SpawnCounts, EditAnywhere)
+		int MaxUpgradeTiles;
+
+	UPROPERTY(Category = SpawnCounts, EditAnywhere)
+		int MinPickupTiles;
+
+	UPROPERTY(Category = SpawnCounts, EditAnywhere)
+		int MaxPickupTiles;
+
 	UPROPERTY(Category = Enemy, EditAnywhere)
 		TArray<TSubclassOf<class AEnemyControllerBase>> Enemies;
 
@@ -122,6 +143,8 @@ public:
 	void CheckAndActivateRoom();
 
 	void SetPlayerController(APlayerTopDownController* playerController);
+	void SetDungeonGenerator(ADungeonGenerator* dungeonGenerator);
+	
 	void SpawnEnemies();
 	void ClearAllEnemies();
 	void HandleEnemyDied(AEnemyControllerBase* enemy);

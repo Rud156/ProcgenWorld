@@ -850,6 +850,10 @@ void APlayerTopDownController::CollectPickup(PickupType pickupType, int count)
 
 	currentCount += count;
 	_playerPickups.Add(pickupType, currentCount);
+
+	FMyPickupType myPickup = FMyPickupType();
+	myPickup.Pickups = _playerPickups;
+	OnPickupsChanged.Broadcast(myPickup);
 }
 
 void APlayerTopDownController::UsePickup(PickupType pickupType)
@@ -868,6 +872,10 @@ void APlayerTopDownController::UsePickup(PickupType pickupType)
 			_playerPickups.Add(pickupType, count);
 		}
 	}
+
+	FMyPickupType myPickup = FMyPickupType();
+	myPickup.Pickups = _playerPickups;
+	OnPickupsChanged.Broadcast(myPickup);
 }
 
 bool APlayerTopDownController::HasPickup(PickupType pickupType)

@@ -274,6 +274,7 @@ void ADungeonGenerator::SpawnRooms()
 					ARoomGenerator* roomGenerator = Cast<ARoomGenerator>(roomInstance);
 
 					roomGenerator->LoadRoomFromFile(_roomMatrix[i][j], SpawnRoomPoint);
+					roomGenerator->SetDungeonGenerator(this);
 					_rooms[i].Add(j, roomGenerator);
 				}
 			}

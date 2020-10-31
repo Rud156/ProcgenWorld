@@ -730,6 +730,26 @@ void ARoomGenerator::ClearRoomTiles()
 	}
 }
 
+void ARoomGenerator::ClearStatusTiles()
+{
+	for (int i = 0; i < _floorTiles.Num(); i++)
+	{
+		auto tileType = _floorTiles[i]->GetTileType();
+
+		switch (tileType)
+		{
+		case TileType::UpgradeTile:
+			_floorTiles[i]->SetTileType(TileType::FloorTile);
+			break;
+
+		default:
+			break;
+		}
+
+		_floorTiles[i]->SetPickupType(PickupType::None);
+	}
+}
+
 int ARoomGenerator::GetRoomDepth()
 {
 	return  _roomDepth;

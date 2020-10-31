@@ -898,9 +898,14 @@ void APlayerTopDownController::ApplyUpgrade(UpgradeType upgradeType)
 		break;
 	}
 
-	if (_lastClickedTile->GetTileType() == TileType::UpgradeTile)
+	// TODO: Probably think of a better way later on...
+	auto tiles = _currentRoom->GetFloorTiles();
+	for (int i = 0; i < tiles.Num(); i++)
 	{
-		_lastClickedTile->SetTileType(TileType::FloorTile);
+		if (tiles[i]->GetTileType() == TileType::UpgradeTile)
+		{
+			tiles[i]->SetTileType(TileType::FloorTile);
+		}
 	}
 
 	_gameController->EndPlayerTurn();
@@ -908,6 +913,13 @@ void APlayerTopDownController::ApplyUpgrade(UpgradeType upgradeType)
 
 void APlayerTopDownController::CollectPickup(PickupType pickupType, int count)
 {
+	OnTestDelegate.Broadcast();
+	
+	if (pickupType == PickupType::None)
+	{
+		return;
+	}
+
 	int currentCount = 0;
 	if (_playerPickups.Contains(pickupType))
 	{

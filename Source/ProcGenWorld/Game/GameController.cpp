@@ -97,6 +97,7 @@ void AGameController::BeginGameTurn()
 void AGameController::EndGameTurn()
 {
 	_gameTurnActive = false;
+	_currentRoom->ClearStatusTiles();
 	_playerTopDownController->DisablePlayerTurn();
 	_playerTopDownController->EnableFreeMovement();
 }

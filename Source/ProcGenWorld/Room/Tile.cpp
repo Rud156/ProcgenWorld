@@ -129,6 +129,7 @@ void ATile::SetPickupType(PickupType pickupType)
 		break;
 	}
 
+	_pickupType = pickupType;
 	_pickupItem = pickup;
 }
 

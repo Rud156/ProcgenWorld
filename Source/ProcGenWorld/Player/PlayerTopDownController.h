@@ -17,6 +17,7 @@ class ATile;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDied);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPickupsChanged, FMyPickupType, Pickups);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTestDelegate);
 
 UCLASS()
 class PROCGENWORLD_API APlayerTopDownController : public APawn
@@ -135,6 +136,9 @@ public:
 
 	UPROPERTY(Category = Pickups, BlueprintAssignable)
 		FPickupsChanged OnPickupsChanged;
+
+	UPROPERTY(Category = Pickups, BlueprintAssignable)
+		FTestDelegate OnTestDelegate;
 
 #pragma endregion
 

@@ -11,7 +11,6 @@ AWarriorController::AWarriorController() : Super()
 	DamageAmount = 1;
 }
 
-
 void AWarriorController::Execute()
 {
 	bool isPlayerAdjacent = IsPlayerInAdjacentTile();

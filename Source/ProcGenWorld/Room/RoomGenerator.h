@@ -162,6 +162,7 @@ public:
 
 	void SpawnRoomTiles();
 	void ClearRoomTiles();
+	void ClearStatusTiles();
 
 	UFUNCTION(Category = Display, BlueprintCallable, BlueprintPure)
 		int GetRoomDepth();
